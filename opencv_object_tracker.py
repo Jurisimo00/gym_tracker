@@ -72,7 +72,7 @@ def track():
 		frame = imutils.resize(frame, width=500)
 		(H, W) = frame.shape[:2]
 		#frame = holi.process(frame)
-		frame = PoseTracking.process(frame)
+		frame, land = PoseTracking.process(frame)
 		# check to see if we are currently tracking an object
 		if initBB is not None:
 			# grab the new bounding box coordinates of the object
@@ -89,7 +89,6 @@ def track():
 					points = np.array([[centerX,centerY]],dtype=np.uint8)
 					first=False
 				points = np.append(points,[[centerX,centerY]], axis=0)
-				#print(points)
 				cv2.polylines(frame, 
 				[points], 
 				isClosed = False,

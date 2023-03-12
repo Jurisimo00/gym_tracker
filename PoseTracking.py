@@ -24,5 +24,5 @@ def process(image):
             results.pose_landmarks,
             mp_pose.POSE_CONNECTIONS,
             landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
-        # Flip the image horizontally for a selfie-view display.
-    return image
+    #return image and the normalized landmark list
+    return image, results.pose_landmarks.landmark
