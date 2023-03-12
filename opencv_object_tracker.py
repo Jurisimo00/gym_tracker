@@ -6,7 +6,8 @@ import imutils
 import time
 import cv2
 import numpy as np
-#import holi
+import holi
+import PoseTracking
 from WebcamMultiThread import WebcamStream
 
 def track():
@@ -14,7 +15,7 @@ def track():
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-v", "--video", type=str,
 	help="path to input video file")
-	ap.add_argument("-t", "--tracker", type=str, default="csrt",
+	ap.add_argument("-t", "--tracker", type=str, default="kcf",
 	help="OpenCV object tracker type")
 	args = vars(ap.parse_args())
 	# extract the OpenCV version info
@@ -71,6 +72,7 @@ def track():
 		frame = imutils.resize(frame, width=500)
 		(H, W) = frame.shape[:2]
 		#frame = holi.process(frame)
+		frame = PoseTracking.process(frame)
 		# check to see if we are currently tracking an object
 		if initBB is not None:
 			# grab the new bounding box coordinates of the object
