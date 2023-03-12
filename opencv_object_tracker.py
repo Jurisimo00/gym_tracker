@@ -6,14 +6,15 @@ import imutils
 import time
 import cv2
 import numpy as np
-
+#import holi
+from WebcamMultiThread import WebcamStream
 
 def track():
 	# construct the argument parser and parse the arguments
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-v", "--video", type=str,
 	help="path to input video file")
-	ap.add_argument("-t", "--tracker", type=str, default="kcf",
+	ap.add_argument("-t", "--tracker", type=str, default="csrt",
 	help="OpenCV object tracker type")
 	args = vars(ap.parse_args())
 	# extract the OpenCV version info
@@ -46,7 +47,9 @@ def track():
 # if a video path was not supplied, grab the reference to the web cam
 	if not args.get("video", False):
 		print("[INFO] starting video stream...")
-		vs = VideoStream(src=0).start()
+		#vs = VideoStream(src=0).start()
+		webcam_stream=WebcamStream(stream_id=0)
+		webcam_stream.start()
 		time.sleep(1.0)
 # otherwise, grab a reference to the video file
 	else:
@@ -57,7 +60,8 @@ def track():
 	while True:
 		# grab the current frame, then handle if we are using a
 		# VideoStream or VideoCapture object
-		frame = vs.read()
+		#frame = vs.read()
+		frame = webcam_stream.read()
 		frame = frame[1] if args.get("video", False) else frame
 		# check to see if we have reached the end of the stream
 		if frame is None:
@@ -66,7 +70,7 @@ def track():
 		# frame dimensions
 		frame = imutils.resize(frame, width=500)
 		(H, W) = frame.shape[:2]
-		
+		#frame = holi.process(frame)
 		# check to see if we are currently tracking an object
 		if initBB is not None:
 			# grab the new bounding box coordinates of the object
@@ -78,7 +82,7 @@ def track():
 					(0, 255, 0), 2)
 				centerX = np.rint((x + (w/2))).astype(int)
 				centerY = np.rint((y + (y/2))).astype(int)
-				print(centerX,centerY)
+				#print(centerX,centerY)
 				if first:
 					points = np.array([[centerX,centerY]],dtype=np.uint8)
 					first=False
@@ -90,8 +94,6 @@ def track():
 				color = (0,255,0),
 				thickness = 3, 
 				lineType = cv2.LINE_AA)
-				print(points[0])
-				print(points[1])
 			# update the FPS counter
 			fps.update()
 			fps.stop()
@@ -108,7 +110,7 @@ def track():
 				cv2.putText(frame, text, (10, H - ((i * 20) + 20)),
 					cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 		# show the output frame
-		cv2.flip(frame,0)
+		#frame = cv2.flip(frame,1)
 		cv2.imshow("Frame", frame)
 		key = cv2.waitKey(1) & 0xFF
 		# if the 's' key is selected, we are going to "select" a bounding
@@ -128,7 +130,8 @@ def track():
 			break
 	# if we are using a webcam, release the pointer
 	if not args.get("video", False):
-		vs.stop()
+		#vs.stop()
+		webcam_stream.stop()
 	# otherwise, release the file pointer
 	else:
 		vs.release()
