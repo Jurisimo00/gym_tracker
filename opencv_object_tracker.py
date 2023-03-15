@@ -45,6 +45,7 @@ def track():
 # to track
 	initBB = None
 	first = True
+	pose = True
 # if a video path was not supplied, grab the reference to the web cam
 	if not args.get("video", False):
 		print("[INFO] starting video stream...")
@@ -72,7 +73,17 @@ def track():
 		frame = imutils.resize(frame, width=500)
 		(H, W) = frame.shape[:2]
 		#frame = holi.process(frame)
-		frame, land = PoseTracking.process(frame)
+		if pose:
+			frame, land = PoseTracking.process(frame)
+			a = np.array([int(land[0].x*W),int(land[0].y*H)])
+			b = np.array([int(land[1].x*W),int(land[1].y*H)])
+			c = np.array([int(land[2].x*W),int(land[2].y*H)])
+			cv2.circle(frame, (a[0], a[1]), 12,
+					(0, 255, 0), 2)
+			angle = PoseTracking.getAngle(a,b,c)
+			#print(angle)
+			cv2.putText(frame, f'{int(angle)}',(b[0],b[1]),
+	       cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
 		# check to see if we are currently tracking an object
 		if initBB is not None:
 			# grab the new bounding box coordinates of the object
@@ -121,6 +132,8 @@ def track():
 			# sure you press ENTER or SPACE after selecting the ROI)
 			initBB = cv2.selectROI("Frame", frame, fromCenter=False,
 				showCrosshair=True)
+			#when track movement don't use poseTracking
+			pose = False
 			# start OpenCV object tracker using the supplied bounding box
 			# coordinates, then start the FPS throughput estimator as well
 			tracker.init(frame, initBB)
