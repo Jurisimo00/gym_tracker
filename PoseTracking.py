@@ -29,20 +29,25 @@ def process(image):
     return image, results.pose_landmarks.landmark
 
 def getAngle(a,b,c):
-    
-    ba = a - b
-    bc = c - b
-    cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
-    angle = np.arccos(cosine_angle)
-    return np.degrees(angle)
+    #check if a b c is an array
+    if(type(a) != None and type(b) != None and type(c) != None):
+        ba = a - b
+        bc = c - b
+        cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+        angle = np.arccos(cosine_angle)
+        return True, np.degrees(angle)
+    return False, 0
 
 def getAngles(width, height, land):
     #list of functional pose points see :https://github.com/google/mediapipe/blob/master/docs/solutions/pose.md#output
     index = [[11,13,15],[12,14,16],[23,25,27],[24,26,28]]
     angles=np.array([])
     for i in index:
-        a = np.array([int(land[i[0]].x*width),int(land[i[0]].y*height)]) #if (land[i[0]].visibility > 0.7)
-        b = np.array([int(land[i[1]].x*width),int(land[i[1]].y*height)]) #if (land[i[1]].visibility > 0.7)
-        c = np.array([int(land[i[2]].x*width),int(land[i[2]].y*height)]) #if (land[i[2]].visibility > 0.7)
-        angles=np.append(angles,getAngle(a,b,c))
+        a = np.array([int(land[i[0]].x*width),int(land[i[0]].y*height)]) if (land[i[0]].visibility > 0.7) else None
+        b = np.array([int(land[i[1]].x*width),int(land[i[1]].y*height)]) if (land[i[1]].visibility > 0.7) else None
+        c = np.array([int(land[i[2]].x*width),int(land[i[2]].y*height)]) if (land[i[2]].visibility > 0.7) else None
+        check,angle=self.getAngle(a,b,c)
+        if(check):
+            angles=np.append(angle)
+    return angles
     
