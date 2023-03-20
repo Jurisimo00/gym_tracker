@@ -54,7 +54,7 @@ def track():
 		#flag to know if is a stream or not
 		webcam = True
 		time.sleep(1.0)
-		su.stream(tracker)
+		su.stream(tracker,args)
 # otherwise, grab a reference to the video file
 	else:
 		vs = cv2.VideoCapture(args["video"])

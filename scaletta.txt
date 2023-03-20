@@ -1,1 +1,2 @@
-spostare video tutto da una parte e stream tutta dall'altra
+spostare video tutto da una parte e stream tutta dall'altra ok
+creare un multithread stile webcamMultiThread
