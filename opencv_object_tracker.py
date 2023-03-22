@@ -7,7 +7,6 @@ import imutils
 import time
 import cv2
 import numpy as np
-import holi
 import PoseTracking
 from WebcamMultiThread import WebcamStream
 import streamUtils as su
