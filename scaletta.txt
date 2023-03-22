@@ -1,2 +1,3 @@
+gestione calcolo angoli
 spostare video tutto da una parte e stream tutta dall'altra ok
-creare un multithread stile webcamMultiThread
+creare un multithread stile webcamMultiThread mmmm

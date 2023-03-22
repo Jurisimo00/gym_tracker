@@ -20,12 +20,15 @@ def process(image):
         # Draw the pose annotation on the image.
         image.flags.writeable = True
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        mp_drawing.draw_landmarks(
-            image,
-            results.pose_landmarks,
-            mp_pose.POSE_CONNECTIONS,
-            landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+        # mp_drawing.draw_landmarks(
+        #     image,
+        #     results.pose_landmarks,
+        #     mp_pose.POSE_CONNECTIONS,
+        #     landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
     #return image and the normalized landmark list
+        if(results.pose_landmarks == None):
+            print(results.pose_landmarks)
+            return image,0
     return image, results.pose_landmarks.landmark
 
 def getAngle(a,b,c):
@@ -43,11 +46,14 @@ def getAngles(width, height, land):
     index = [[11,13,15],[12,14,16],[23,25,27],[24,26,28]]
     angles=np.array([])
     for i in index:
-        a = np.array([int(land[i[0]].x*width),int(land[i[0]].y*height)]) if (land[i[0]].visibility > 0.7) else None
-        b = np.array([int(land[i[1]].x*width),int(land[i[1]].y*height)]) if (land[i[1]].visibility > 0.7) else None
-        c = np.array([int(land[i[2]].x*width),int(land[i[2]].y*height)]) if (land[i[2]].visibility > 0.7) else None
-        check,angle=self.getAngle(a,b,c)
+        a = np.array([int(land[i[0]].x*width),int(land[i[0]].y*height)]) #if (land[i[0]].visibility > 0.7) else None
+        b = np.array([int(land[i[1]].x*width),int(land[i[1]].y*height)]) #if (land[i[1]].visibility > 0.7) else None
+        c = np.array([int(land[i[2]].x*width),int(land[i[2]].y*height)]) #if (land[i[2]].visibility > 0.7) else None
+        check,angle=getAngle(a,b,c)
+        print(angle)
         if(check):
-            angles=np.append(angle)
+            angles=np.append(angles,angle)
+            #print(angles)
+    #return tuples of angles and point to write angle
     return angles
     

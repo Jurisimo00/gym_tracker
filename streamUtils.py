@@ -28,16 +28,18 @@ def stream(tracker,args):
         frame = imutils.resize(frame, width=500)
         (H, W) = frame.shape[:2]
         if pose:
+            
             frame, land = PoseTracking.process(frame)
-            a = np.array([int(land[23].x*W),int(land[23].y*H)])
-            b = np.array([int(land[25].x*W),int(land[25].y*H)])
-            c = np.array([int(land[27].x*W),int(land[27].y*H)])
-            cv2.circle(frame, (a[0], a[1]), 12,
-                (0, 255, 0), 2)
-            check, angle = PoseTracking.getAngle(a,b,c)
-            if(check):
-                cv2.putText(frame, f'{int(angle)}',(b[0],b[1]),
-                        cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
+            if(land):
+                a = np.array([int(land[23].x*W),int(land[23].y*H)])
+                b = np.array([int(land[25].x*W),int(land[25].y*H)])
+                c = np.array([int(land[27].x*W),int(land[27].y*H)])
+                cv2.circle(frame, (a[0], a[1]), 12,
+                    (0, 255, 0), 2)
+                check, angle = PoseTracking.getAngle(a,b,c)
+                if(check):
+                    cv2.putText(frame, f'{int(angle)}',(b[0],b[1]),
+                            cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
         # check to see if we are currently tracking an object
         if initBB is not None:
             # grab the new bounding box coordinates of the object

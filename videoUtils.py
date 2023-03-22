@@ -1,5 +1,6 @@
 # import the necessary packages
 from imutils.video import FileVideoStream
+from imutils.video import WebcamVideoStream
 from imutils.video import FPS
 import numpy as np
 import argparse
@@ -7,6 +8,7 @@ import imutils
 import time
 import cv2
 import PoseTracking
+#from videoThread import FileVideoStream
 
 def video(tracker,args):
     initBB = None
@@ -26,20 +28,33 @@ def video(tracker,args):
         # it, and convert it to grayscale (while still retaining 3
         # channels)
         frame = fvs.read()
-        frame = imutils.resize(frame, width=450)
+        #frame = imutils.resize(frame, width=450)
         (H, W) = frame.shape[:2]
         if pose:
             frame, land = PoseTracking.process(frame)
-            a = np.array([int(land[23].x*W),int(land[23].y*H)])
-            b = np.array([int(land[25].x*W),int(land[25].y*H)])
-            c = np.array([int(land[27].x*W),int(land[27].y*H)])
-            cv2.circle(frame, (a[0], a[1]), 12,
-                (0, 255, 0), 2)
-            check, angle = PoseTracking.getAngle(a,b,c)
-            if(check):
-                cv2.putText(frame, f'{int(angle)}',(b[0],b[1]),
+            if(land):
+                #print(angle)
+                #solution to update
+                angles=PoseTracking.getAngles(W,H,land)
+                print(angles)
+                #left
+                cv2.putText(frame, f'{int(angles[3])}',(int(land[25].x*W),int(land[25].y*H)),
                         cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
-        #frame = np.dstack([frame, frame, frame])	
+                cv2.circle(frame, (int(land[25].x*W),int(land[25].y*H)), 2,
+                    (0, 255, 0), 2)
+                cv2.putText(frame, f'{int(angles[0])}',(int(land[13].x*W),int(land[13].y*H)),
+                        cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
+                cv2.circle(frame, (int(land[13].x*W),int(land[13].y*H)), 2,
+                    (0, 255, 0), 2)
+                #right
+                cv2.putText(frame, f'{int(angles[2])}',(int(land[26].x*W),int(land[26].y*H)),
+                        cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
+                cv2.circle(frame, (int(land[26].x*W),int(land[26].y*H)), 2,
+                    (0, 255, 0), 2)
+                cv2.putText(frame, f'{int(angles[1])}',(int(land[14].x*W),int(land[14].y*H)),
+                        cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
+                cv2.circle(frame, (int(land[14].x*W),int(land[14].y*H)), 2,
+                    (0, 255, 0), 2)
         # show the frame and update the FPS counter
         cv2.waitKey(1)
         fps.update()
