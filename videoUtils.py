@@ -38,20 +38,20 @@ def video(tracker,args):
                 angles=PoseTracking.getAngles(W,H,land)
                 print(angles)
                 #left
-                cv2.putText(frame, f'{int(angles[3])}',(int(land[25].x*W),int(land[25].y*H)),
+                cv2.putText(frame, f'{angles[3]}',(int(land[25].x*W),int(land[25].y*H)),
                         cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
                 cv2.circle(frame, (int(land[25].x*W),int(land[25].y*H)), 2,
                     (0, 255, 0), 2)
-                cv2.putText(frame, f'{int(angles[0])}',(int(land[13].x*W),int(land[13].y*H)),
+                cv2.putText(frame, f'{angles[0]}',(int(land[13].x*W),int(land[13].y*H)),
                         cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
                 cv2.circle(frame, (int(land[13].x*W),int(land[13].y*H)), 2,
                     (0, 255, 0), 2)
                 #right
-                cv2.putText(frame, f'{int(angles[2])}',(int(land[26].x*W),int(land[26].y*H)),
+                cv2.putText(frame, f'{angles[2]}',(int(land[26].x*W),int(land[26].y*H)),
                         cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
                 cv2.circle(frame, (int(land[26].x*W),int(land[26].y*H)), 2,
                     (0, 255, 0), 2)
-                cv2.putText(frame, f'{int(angles[1])}',(int(land[14].x*W),int(land[14].y*H)),
+                cv2.putText(frame, f'{angles[1]}',(int(land[14].x*W),int(land[14].y*H)),
                         cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
                 cv2.circle(frame, (int(land[14].x*W),int(land[14].y*H)), 2,
                     (0, 255, 0), 2)

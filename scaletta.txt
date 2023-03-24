@@ -1,3 +1,4 @@
+nella parte video selzione da cui visualizzare video (probabile modifica al FileVideoStream)
 gestione calcolo angoli ->calcolo funzionante 
 spostare video tutto da una parte e stream tutta dall'altra ok
 creare un multithread stile webcamMultiThread mmmm

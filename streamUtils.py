@@ -98,7 +98,7 @@ def stream(tracker,args):
                 # if the `q` key was pressed, break from the loop
         elif key == ord("q"):
             break
-        #Remove ROI
+        #Restart application
         if key == ord("r"):
             webcam_stream.stop()
             cv2.destroyAllWindows()

@@ -33,7 +33,7 @@ def process(image):
 
 def getAngle(a,b,c):
     #check if a b c is an array
-    if(type(a) != None and type(b) != None and type(c) != None):
+    if(type(a) != type(None) and type(b) != type(None) and type(c) != type(None)):
         ba = a - b
         bc = c - b
         cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
@@ -46,14 +46,16 @@ def getAngles(width, height, land):
     index = [[11,13,15],[12,14,16],[23,25,27],[24,26,28]]
     angles=np.array([])
     for i in index:
-        a = np.array([int(land[i[0]].x*width),int(land[i[0]].y*height)]) #if (land[i[0]].visibility > 0.7) else None
-        b = np.array([int(land[i[1]].x*width),int(land[i[1]].y*height)]) #if (land[i[1]].visibility > 0.7) else None
-        c = np.array([int(land[i[2]].x*width),int(land[i[2]].y*height)]) #if (land[i[2]].visibility > 0.7) else None
+        a = np.array([int(land[i[0]].x*width),int(land[i[0]].y*height)]) if (land[i[0]].visibility > 0.5) else None
+        b = np.array([int(land[i[1]].x*width),int(land[i[1]].y*height)]) if (land[i[1]].visibility > 0.5) else None
+        c = np.array([int(land[i[2]].x*width),int(land[i[2]].y*height)]) if (land[i[2]].visibility > 0.5) else None
         check,angle=getAngle(a,b,c)
         print(angle)
         if(check):
-            angles=np.append(angles,angle)
+            angles=np.append(angles,int(angle))
             #print(angles)
+        else:
+            angles=np.append(angles,'None')
     #return tuples of angles and point to write angle
     return angles
     
