@@ -10,6 +10,7 @@ import numpy as np
 import holi
 import PoseTracking
 from WebcamMultiThread import WebcamStream
+import os
 
 def stream(tracker,args):
     initBB = None
@@ -28,7 +29,6 @@ def stream(tracker,args):
         frame = imutils.resize(frame, width=500)
         (H, W) = frame.shape[:2]
         if pose:
-            
             frame, land = PoseTracking.process(frame)
             if(land):
                 a = np.array([int(land[23].x*W),int(land[23].y*H)])
@@ -97,6 +97,12 @@ def stream(tracker,args):
             
                 # if the `q` key was pressed, break from the loop
         elif key == ord("q"):
+            break
+        #Remove ROI
+        if key == ord("r"):
+            webcam_stream.stop()
+            cv2.destroyAllWindows()
+            os.system('python3 "main.py"')
             break
     # if we are using a webcam, release the pointer
     webcam_stream.stop()
