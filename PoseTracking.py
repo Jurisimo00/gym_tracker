@@ -20,14 +20,16 @@ def process(image):
         # Draw the pose annotation on the image.
         image.flags.writeable = True
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        # mp_drawing.draw_landmarks(
-        #     image,
-        #     results.pose_landmarks,
-        #     mp_pose.POSE_CONNECTIONS,
-        #     landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+        skeleton = np.zeros_like(image)
+        mp_drawing.draw_landmarks(
+            skeleton,
+            results.pose_landmarks,
+            mp_pose.POSE_CONNECTIONS,
+            landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+        cv2.imshow('skeleton',skeleton)
     #return image and the normalized landmark list
         if(results.pose_landmarks == None):
-            print(results.pose_landmarks)
+            #print(results.pose_landmarks)
             return image,0
     return image, results.pose_landmarks.landmark
 
@@ -50,7 +52,7 @@ def getAngles(width, height, land):
         b = np.array([int(land[i[1]].x*width),int(land[i[1]].y*height)]) if (land[i[1]].visibility > 0.5) else None
         c = np.array([int(land[i[2]].x*width),int(land[i[2]].y*height)]) if (land[i[2]].visibility > 0.5) else None
         check,angle=getAngle(a,b,c)
-        print(angle)
+        #print(angle)
         if(check):
             angles=np.append(angles,int(angle))
             #print(angles)

@@ -14,6 +14,8 @@ def video(tracker,args):
     initBB = None
     first = True
     pose = True
+    reps = 0
+    prevAng=180
     # construct the argument parse and parse the arguments
     # start the file video stream thread and allow the buffer to
     # start to fill
@@ -36,7 +38,7 @@ def video(tracker,args):
                 #print(angle)
                 #solution to update
                 angles=PoseTracking.getAngles(W,H,land)
-                print(angles)
+                #print(angles)
                 #left
                 cv2.putText(frame, f'{angles[3]}',(int(land[25].x*W),int(land[25].y*H)),
                         cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
@@ -55,6 +57,17 @@ def video(tracker,args):
                         cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
                 cv2.circle(frame, (int(land[14].x*W),int(land[14].y*H)), 2,
                     (0, 255, 0), 2)
+                #squat count reps test
+                print((angles[2],prevAng))
+                if(int(float(angles[2]))<100 and prevAng>100):
+                    reps+=1
+                    #first angle under tollerance
+                    prevAng=angles[2]
+                    print(prevAng)
+                cv2.putText(frame, "reps:{}".format(reps), (10, 50),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+                if(int(float(angles[2]))>100):
+                        prevAng=180
         # show the frame and update the FPS counter
         cv2.waitKey(1)
         fps.update()

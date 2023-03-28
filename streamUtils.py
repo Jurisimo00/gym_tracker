@@ -51,9 +51,14 @@ def stream(tracker,args):
                     (0, 255, 0), 2)
                 centerX = np.rint((x + (w/2))).astype(int)
                 centerY = np.rint((y + (y/2))).astype(int)
-                #print(centerX,centerY)
                 if first:
-                    points = np.array([[centerX,centerY]],dtype=np.uint8)
+                    print(centerX,centerY)
+                    center = [centerX,centerY]
+                    print(center)
+                    points = np.array([center],dtype=np.uint8)
+                    #to check!
+                    #if(points[0][0] != center[0]):
+                        #points[0][0] = center[0]
                     first=False
                 points = np.append(points,[[centerX,centerY]], axis=0)
                 cv2.polylines(frame, 

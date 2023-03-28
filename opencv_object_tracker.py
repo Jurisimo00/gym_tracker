@@ -19,6 +19,7 @@ def track():
 	help="path to input video file")
 	ap.add_argument("-t", "--tracker", type=str, default="kcf",
 	help="OpenCV object tracker type")
+	ap.add_argument("-e","--exercise",type=str)
 	args = vars(ap.parse_args())
 	# extract the OpenCV version info
 	(major, minor) = cv2.__version__.split(".")[:2]
