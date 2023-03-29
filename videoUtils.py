@@ -26,6 +26,14 @@ def video(tracker,args):
     # start the FPS timer
     fps = FPS().start()
     counter = RepsCounter(args["exercise"])
+    startFrame = fvs.read()
+    # select the bounding box of the object we want to track (make
+    # sure you press ENTER or SPACE after selecting the ROI)
+    initBB = cv2.selectROI("Frame", startFrame, fromCenter=False,
+        showCrosshair=True)
+    # start OpenCV object tracker using the supplied bounding box
+    # coordinates
+    tracker.init(startFrame, initBB)
     # loop over frames from the video file stream
     while fvs.more():
         # grab the frame from the threaded video file stream, resize
@@ -35,33 +43,33 @@ def video(tracker,args):
         #frame = imutils.resize(frame, width=450)
         (H, W) = frame.shape[:2]
         if pose:
-            frame, land = PoseTracking.process(frame)
+            frame, skeleton, land = PoseTracking.process(frame)
             if(land):
                 #print(angle)
                 #solution to update
                 angles=PoseTracking.getAngles(W,H,land)
                 #print(angles)
                 #left
-                cv2.putText(frame, f'{angles[3]}',(int(land[25].x*W),int(land[25].y*H)),
+                cv2.putText(skeleton, f'{angles[3]}',(int(land[25].x*W),int(land[25].y*H)),
                         cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
-                cv2.circle(frame, (int(land[25].x*W),int(land[25].y*H)), 2,
+                cv2.circle(skeleton, (int(land[25].x*W),int(land[25].y*H)), 2,
                     (0, 255, 0), 2)
-                cv2.putText(frame, f'{angles[0]}',(int(land[13].x*W),int(land[13].y*H)),
+                cv2.putText(skeleton, f'{angles[0]}',(int(land[13].x*W),int(land[13].y*H)),
                         cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
-                cv2.circle(frame, (int(land[13].x*W),int(land[13].y*H)), 2,
+                cv2.circle(skeleton, (int(land[13].x*W),int(land[13].y*H)), 2,
                     (0, 255, 0), 2)
                 #right
-                cv2.putText(frame, f'{angles[2]}',(int(land[26].x*W),int(land[26].y*H)),
+                cv2.putText(skeleton, f'{angles[2]}',(int(land[26].x*W),int(land[26].y*H)),
                         cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
-                cv2.circle(frame, (int(land[26].x*W),int(land[26].y*H)), 2,
+                cv2.circle(skeleton, (int(land[26].x*W),int(land[26].y*H)), 2,
                     (0, 255, 0), 2)
-                cv2.putText(frame, f'{angles[1]}',(int(land[14].x*W),int(land[14].y*H)),
+                cv2.putText(skeleton, f'{angles[1]}',(int(land[14].x*W),int(land[14].y*H)),
                         cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
-                cv2.circle(frame, (int(land[14].x*W),int(land[14].y*H)), 2,
+                cv2.circle(skeleton, (int(land[14].x*W),int(land[14].y*H)), 2,
                     (0, 255, 0), 2)
                 #count reps
                 print(angles[3])
-                counter.count(angles[3])
+                counter.count(angles)
                 cv2.putText(frame, "reps:{}".format(counter.get()), (10, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
         # show the frame and update the FPS counter
@@ -107,6 +115,7 @@ def video(tracker,args):
         # show the output frame
         #frame = cv2.flip(frame,1)
         cv2.imshow("Frame", frame)
+        cv2.imshow('skeleton',skeleton)
         key = cv2.waitKey(1) & 0xFF
         # if the 's' key is selected, we are going to "select" a bounding
         # box to track
@@ -121,7 +130,7 @@ def video(tracker,args):
             # start OpenCV object tracker using the supplied bounding box
             # coordinates
             tracker.init(frame, initBB)
-                # if the `q` key was pressed, break from the loop
+        # if the `q` key was pressed, break from the loop
         elif key == ord("q"):
             break
         # stop the timer and display FPS information

@@ -29,7 +29,7 @@ def stream(tracker,args):
         frame = imutils.resize(frame, width=500)
         (H, W) = frame.shape[:2]
         if pose:
-            frame, land = PoseTracking.process(frame)
+            frame, skeleton, land = PoseTracking.process(frame)
             if(land):
                 a = np.array([int(land[23].x*W),int(land[23].y*H)])
                 b = np.array([int(land[25].x*W),int(land[25].y*H)])
@@ -85,6 +85,7 @@ def stream(tracker,args):
         # show the output frame
         #frame = cv2.flip(frame,1)
         cv2.imshow("Frame", frame)
+        cv2.imshow("Skeleton", skeleton)
         key = cv2.waitKey(1) & 0xFF
         # if the 's' key is selected, we are going to "select" a bounding
         # box to track

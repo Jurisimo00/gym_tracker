@@ -26,12 +26,11 @@ def process(image):
             results.pose_landmarks,
             mp_pose.POSE_CONNECTIONS,
             landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
-        cv2.imshow('skeleton',skeleton)
     #return image and the normalized landmark list
         if(results.pose_landmarks == None):
             #print(results.pose_landmarks)
             return image,0
-    return image, results.pose_landmarks.landmark
+    return image,skeleton, results.pose_landmarks.landmark
 
 def getAngle(a,b,c):
     #check if a b c is an array
