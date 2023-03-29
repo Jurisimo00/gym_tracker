@@ -57,7 +57,7 @@ def getAngles(width, height, land):
             angles=np.append(angles,int(angle))
             #print(angles)
         else:
-            angles=np.append(angles,'None')
+            angles=np.append(angles,None)
     #return tuples of angles and point to write angle
     return angles
     

@@ -19,7 +19,7 @@ def track():
 	help="path to input video file")
 	ap.add_argument("-t", "--tracker", type=str, default="kcf",
 	help="OpenCV object tracker type")
-	ap.add_argument("-e","--exercise",type=str)
+	ap.add_argument("-e","--exercise",type=str, default="squat")
 	args = vars(ap.parse_args())
 	# extract the OpenCV version info
 	(major, minor) = cv2.__version__.split(".")[:2]
@@ -57,7 +57,7 @@ def track():
 		su.stream(tracker,args)
 # otherwise, grab a reference to the video file
 	else:
-		vs = cv2.VideoCapture(args["video"])
+		#vs = cv2.VideoCapture(args["video"])
 		#vs = FileVideoStream(args["video"]).start()
 		time.sleep(1.0)
 		webcam = False
