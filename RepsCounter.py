@@ -5,13 +5,18 @@ class RepsCounter:
         self.exercise = exercise
         self.reps = 0
         self.toll = 180
+        self.prevLand = 0
+        self.first = True
+        self.counted = False
 
     def get(self):
         return self.reps
 
-    def count(self,angle):
+    def count(self,angle,land):
         if(self.exercise == "squat"):
             self.__squat(angle)
+        if(self.exercise == "deadlift"):
+            self.__deadlift(land)
 
     def __squat(self,angles):
         if(type(angles[3]) == type(None)):
@@ -27,3 +32,21 @@ class RepsCounter:
             self.toll=180
             #no rep
             return False
+        
+    def __deadlift(self,land):
+        print((land[12].y,self.toll, land[12].visibility))
+        #setting the threshold
+        if(self.first):
+            self.toll = land[12].y
+            self.first = False
+        if((land[12].y*1.2) < self.toll and not self.counted):
+            self.reps+=1
+            self.counted = True
+            #self.prevLand=land[12].y
+            print(True)
+            return True
+        if((land[12].y*1.2) > self.toll):
+            self.counted = False
+            print(False)
+        return False
+        

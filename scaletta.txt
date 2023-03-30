@@ -1,4 +1,5 @@
 conteggio ripetizioni (occhio angoli None)->aggiungere libreria RepsCounter in cui andremo ad inserire i vari metodi per il conteggio (ci siamo versione video, da testare su versione stream)
+creare un drawUtils
 scegliere ROI nel video con il primo frame (ci siamo)
 fix problema tracking stream (controllo sul primo valore, nel caso sia fuori dal BB eliminarlo)
 visualizzazione scheletro con punti mediapipe (ci siamo)

@@ -68,8 +68,8 @@ def video(tracker,args):
                 cv2.circle(skeleton, (int(land[14].x*W),int(land[14].y*H)), 2,
                     (0, 255, 0), 2)
                 #count reps
-                print(angles[3])
-                counter.count(angles)
+                #print(angles[3])
+                counter.count(angles,land)
                 cv2.putText(frame, "reps:{}".format(counter.get()), (10, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
         # show the frame and update the FPS counter
