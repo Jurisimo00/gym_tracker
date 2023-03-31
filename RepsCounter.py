@@ -1,4 +1,10 @@
 import cv2
+from enum import Enum
+
+#study to use or not
+class BodyPositions(Enum):
+    RIGHTSHOULDER = 12
+    LEFTSHOULDER = 11
 
 class RepsCounter:
     def __init__(self, exercise):
@@ -16,7 +22,10 @@ class RepsCounter:
         if(self.exercise == "squat"):
             self.__squat(angle)
         if(self.exercise == "deadlift"):
-            self.__deadlift(land)
+            if(land[12].visibility > land[11].visibility):
+                self.__deadlift(land[12])
+            else:
+                self.__deadlift(land[11])
 
     def __squat(self,angles):
         if(type(angles[3]) == type(None)):
@@ -33,19 +42,19 @@ class RepsCounter:
             #no rep
             return False
         
-    def __deadlift(self,land):
-        print((land[12].y,self.toll, land[12].visibility))
+    def __deadlift(self,land): 
+        print((land.y,self.toll, land.visibility))
         #setting the threshold
         if(self.first):
-            self.toll = land[12].y
+            self.toll = land.y
             self.first = False
-        if((land[12].y*1.2) < self.toll and not self.counted):
+        if((land.y*1.2) < self.toll and not self.counted):
             self.reps+=1
             self.counted = True
             #self.prevLand=land[12].y
             print(True)
             return True
-        if((land[12].y*1.2) > self.toll):
+        if((land.y*1.2) > self.toll):
             self.counted = False
             print(False)
         return False

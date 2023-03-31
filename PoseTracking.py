@@ -29,7 +29,7 @@ def process(image):
     #return image and the normalized landmark list
         if(results.pose_landmarks == None):
             #print(results.pose_landmarks)
-            return image,0
+            return image,skeleton,False
     return image,skeleton, results.pose_landmarks.landmark
 
 def getAngle(a,b,c):

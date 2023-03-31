@@ -1,4 +1,4 @@
-conteggio ripetizioni (occhio angoli None)->aggiungere libreria RepsCounter in cui andremo ad inserire i vari metodi per il conteggio (ci siamo versione video, da testare su versione stream)
+conteggio ripetizioni (occhio angoli None)->aggiungere libreria RepsCounter in cui andremo ad inserire i vari metodi per il conteggio (ci siamo versione video, da testare su versione stream) -> fare check di quale lato della persona è più visibile
 creare un drawUtils
 scegliere ROI nel video con il primo frame (ci siamo)
 fix problema tracking stream (controllo sul primo valore, nel caso sia fuori dal BB eliminarlo)

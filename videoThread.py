@@ -15,7 +15,7 @@ else:
 
 
 class FileVideoStream:
-    def __init__(self, path, transform=None, queue_size=128):
+    def __init__(self, path, transform=None, queue_size=256):
         # initialize the file video stream along with the boolean
         # used to indicate if the thread should be stopped or not
         self.stream = cv2.VideoCapture(path)
@@ -66,9 +66,11 @@ class FileVideoStream:
                 # idle grabbing frames.
                 if self.transform:
                     frame = self.transform(frame)
-                frame, land = PoseTracking.process(frame)
+                (H, W) = frame.shape[:2]
+                frame, skeleton,land = PoseTracking.process(frame)
+                angles=PoseTracking.getAngles(W,H,land)
                 # add the frame to the queue
-                self.Q.put(frame)
+                self.Q.put((frame,skeleton,land,angles))
             else:
                 time.sleep(0.1)  # Rest for 10ms, we have a full queue
 
