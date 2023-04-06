@@ -1,10 +1,9 @@
 # importing required libraries 
 import cv2 
-import time 
 from threading import Thread # library for implementing multi-threaded processing 
 
 # defining a helper class for implementing multi-threaded processing 
-class WebcamStream :
+class WebcamStream:
     def __init__(self, stream_id=0):
         self.stream_id = stream_id   # default is 0 for primary camera 
         
