@@ -7,17 +7,20 @@ import imutils
 import time
 import cv2
 import numpy as np
-import holi
 import PoseTracking
 from WebcamMultiThread import WebcamStream
+from RepsCounter import RepsCounter
+
 import os
 
 def stream(tracker,args):
     initBB = None
     first = True
     pose = True
+    counter = RepsCounter(args["exercise"])
     webcam_stream=WebcamStream(stream_id=0)
     webcam_stream.start()
+    start_time=time.time()
     while True:
         frame = webcam_stream.read()
         #frame = frame[1]
@@ -40,6 +43,18 @@ def stream(tracker,args):
                 if(check):
                     cv2.putText(frame, f'{int(angle)}',(b[0],b[1]),
                             cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
+                angles=PoseTracking.getAngles(W,H,land)
+                if((time.time() - start_time)>5.0):
+                    counter.count(angle,land)
+                    toll, axis = counter.getToll()
+                    if(axis == 0):
+                        cv2.line(frame,(int(toll*1.2*W),0),(int(toll*1.2*W),H),(0,255,0),5)
+                    else:
+                        cv2.line(frame,(0,int(toll*1.2*H)),(H,int(toll*1.2*H)),(0,255,0),5)
+                else:
+                    print("WAIT")
+                cv2.putText(frame, "reps:{}".format(counter.get()), (10, 50),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
         # check to see if we are currently tracking an object
         if initBB is not None:
             # grab the new bounding box coordinates of the object
@@ -49,20 +64,15 @@ def stream(tracker,args):
                 (x, y, w, h) = [int(v) for v in box]
                 cv2.rectangle(frame, (x, y), (x + w, y + h),
                     (0, 255, 0), 2)
-                centerX = np.rint((x + (w/2))).astype(int)
-                centerY = np.rint((y + (y/2))).astype(int)
+                centerX = int((x + (w/2)))
+                centerY = int((y + (h/2)))
                 if first:
                     print(centerX,centerY)
-                    center = [centerX,centerY]
-                    print(center)
-                    points = np.array([center],dtype=np.uint8)
-                    #to check!
-                    #if(points[0][0] != center[0]):
-                        #points[0][0] = center[0]
+                    points = np.array([[centerX,centerY]],dtype=np.uint8)
                     first=False
                 points = np.append(points,[[centerX,centerY]], axis=0)
                 cv2.polylines(frame, 
-                [points], 
+                [points[1:len(points)]], 
                 isClosed = False,
                 color = (0,255,0),
                 thickness = 3, 

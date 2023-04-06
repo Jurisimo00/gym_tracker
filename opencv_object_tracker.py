@@ -62,5 +62,3 @@ def track():
 		time.sleep(1.0)
 		webcam = False
 		vu.video(tracker,args)
-# initialize the FPS throughput estimator
-		fps = None

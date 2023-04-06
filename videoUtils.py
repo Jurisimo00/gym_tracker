@@ -10,8 +10,9 @@ import cv2
 import PoseTracking
 from RepsCounter import RepsCounter
 from videoThread import FileVideoStream as vt
-#from videoThread import FileVideoStream
 
+is_selected_pos=False
+toll=0
 def video(tracker,args):
     initBB = None
     first = True
@@ -25,7 +26,15 @@ def video(tracker,args):
     # start the FPS timer
     fps = FPS().start()
     counter = RepsCounter(args["exercise"])
-    startFrame, _, _, _ = fvs.read()
+    startFrame, _, land, _ = fvs.read()
+    cv2.namedWindow('Frame')
+    cv2.setMouseCallback('Frame',getBodyIndex, param=(land,startFrame))
+    #select which body part you want to use for the RepsCounter
+    while(not is_selected_pos):
+        cv2.imshow('Frame',startFrame)
+        print("wait")
+        if cv2.waitKey(20) & 0xFF == 27:
+            break
     # select the bounding box of the object we want to track (make
     # sure you press ENTER or SPACE after selecting the ROI)
     initBB = cv2.selectROI("Frame", startFrame, fromCenter=False,
@@ -42,10 +51,6 @@ def video(tracker,args):
         #frame = imutils.resize(frame, width=450)
         (H, W) = frame.shape[:2]
         if(land):
-            #print(angle)
-            #solution to update
-            #angles=PoseTracking.getAngles(W,H,land)
-            #print(angles)
             #left
             cv2.putText(skeleton, f'{angles[3]}',(int(land[25].x*W),int(land[25].y*H)),
                     cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
@@ -69,6 +74,11 @@ def video(tracker,args):
             counter.count(angles,land)
             cv2.putText(frame, "reps:{}".format(counter.get()), (10, 50),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+            # toll, axis = counter.getToll()
+            # if(axis == 0):
+            #     cv2.line(frame,(int(toll*1.2*W),0),(int(toll*1.2*W),H),(0,255,0),5)
+            # else:
+            #     cv2.line(frame,(0,int(toll*1.2*H)),(H,int(toll*1.2*H)),(0,255,0),5)
         # show the frame and update the FPS counter
         cv2.waitKey(1)
         fps.update()
@@ -89,7 +99,7 @@ def video(tracker,args):
                     first=False
                 points = np.append(points,[[centerX,centerY]], axis=0)
                 cv2.polylines(frame, 
-                [points], 
+                [points[1:len(points)]], 
                 isClosed = False,
                 color = (0,255,0),
                 thickness = 3, 
@@ -137,3 +147,16 @@ def video(tracker,args):
     # do a bit of cleanup
     cv2.destroyAllWindows()
     fvs.stop()
+
+def getBodyIndex(event,x,y,flags,param):
+    global is_selected_pos,toll
+    (land,startframe) = param
+    (H,W) = startframe.shape[:2]
+# to check if left mouse button was clicked
+    if event == cv2.EVENT_LBUTTONDOWN:
+        is_selected_pos = True
+        distance_np = [int(np.sqrt([((l.x*W-x)**2) + ((l.y*H-y)**2)])) for l in land]
+        body_index = distance_np.index(np.min(distance_np))
+        print("left click",x,y,body_index)
+    if event == cv2.EVENT_RBUTTONDOWN:
+        toll = (x,y)

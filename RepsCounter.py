@@ -17,6 +17,17 @@ class RepsCounter:
 
     def get(self):
         return self.reps
+    
+    def getToll(self):
+        #0 = axis x
+        #1 = axis y
+        if(self.exercise == "deadlift"):
+            print(self.toll*1.2)
+            return self.toll,1
+        if(self.exercise == "neck"):
+            print(self.toll*1.2)
+            return self.toll,0
+    
 
     def count(self,angle,land):
         if(self.exercise == "squat"):
@@ -26,6 +37,13 @@ class RepsCounter:
                 self.__deadlift(land[12])
             else:
                 self.__deadlift(land[11])
+        if(self.exercise == "neck"):
+            if(land[0].visibility == False):
+                print("false")
+            if(land[0].visibility > land[1].visibility):
+                self.__neck(land[0])
+            else:
+                self.__neck(land[1])
 
     def __squat(self,angles):
         if(type(angles[3]) == type(None)):
@@ -58,4 +76,17 @@ class RepsCounter:
             self.counted = False
             print(False)
         return False
-        
+    
+    def __neck(self,land):
+        if(self.first):
+            self.toll = land.x
+            self.first = False
+        if(land.x>(self.toll*1.2) and not self.counted):
+            self.reps+=1
+            self.counted=True
+            print((land.x,self.toll*1.2))
+            return True
+        if(land.x<=(self.toll*1.2)):
+            print((land.x,self.toll*1.2,self.counted))
+            self.counted=False
+        return False   
