@@ -1,17 +1,17 @@
 # import the necessary packages
-from imutils.video import VideoStream
-from imutils.video import FileVideoStream
-from imutils.video import FPS
-import argparse
-import imutils
-import time
-import cv2
-import numpy as np
-import PoseTracking
-from WebcamMultiThread import WebcamStream
-from RepsCounter import RepsCounter
-
 import os
+import time
+
+import cv2
+import imutils
+import numpy as np
+from imutils.video import FPS
+from mediapipe.python.solutions.pose import PoseLandmark
+
+import PoseTracking
+from RepsCounter import RepsCounter
+from WebcamMultiThread import WebcamStream
+
 
 def stream(tracker,args):
     initBB = None
@@ -34,18 +34,18 @@ def stream(tracker,args):
         if pose:
             frame, skeleton, land = PoseTracking.process(frame)
             if(land):
-                a = np.array([int(land[23].x*W),int(land[23].y*H)])
-                b = np.array([int(land[25].x*W),int(land[25].y*H)])
-                c = np.array([int(land[27].x*W),int(land[27].y*H)])
+                a = np.array([int(land[PoseLandmark.LEFT_HIP].x*W),int(land[PoseLandmark.LEFT_HIP].y*H)])
+                b = np.array([int(land[PoseLandmark.LEFT_KNEE].x*W),int(land[PoseLandmark.LEFT_KNEE].y*H)])
+                c = np.array([int(land[PoseLandmark.LEFT_ANKLE].x*W),int(land[PoseLandmark.LEFT_ANKLE].y*H)])
                 cv2.circle(frame, (a[0], a[1]), 12,
                     (0, 255, 0), 2)
                 check, angle = PoseTracking.getAngle(a,b,c)
                 if(check):
                     cv2.putText(frame, f'{int(angle)}',(b[0],b[1]),
                             cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
-                angles=PoseTracking.getAngles(W,H,land)
                 if((time.time() - start_time)>5.0):
-                    counter.count(angle,land)
+                    angles=PoseTracking.getAngles(W,H,land)
+                    counter.count(angles,land)
                     toll, axis = counter.getToll()
                     if(axis == 0):
                         cv2.line(frame,(int(toll*1.2*W),0),(int(toll*1.2*W),H),(0,255,0),5)

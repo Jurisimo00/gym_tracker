@@ -1,13 +1,8 @@
 # import the necessary packages
-from imutils.video import FileVideoStream
-from imutils.video import WebcamVideoStream
 from imutils.video import FPS
 import numpy as np
-import argparse
-import imutils
 import time
 import cv2
-import PoseTracking
 from RepsCounter import RepsCounter
 from videoThread import FileVideoStream as vt
 
