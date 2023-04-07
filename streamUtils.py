@@ -17,6 +17,7 @@ def stream(tracker,args):
     initBB = None
     first = True
     pose = True
+    start=False
     counter = RepsCounter(args["exercise"])
     webcam_stream=WebcamStream(stream_id=0)
     webcam_stream.start()
@@ -43,16 +44,27 @@ def stream(tracker,args):
                 if(check):
                     cv2.putText(frame, f'{int(angle)}',(b[0],b[1]),
                             cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
-                if((time.time() - start_time)>5.0):
-                    angles=PoseTracking.getAngles(W,H,land)
-                    counter.count(angles,land)
-                    toll, axis = counter.getToll()
-                    if(axis == 0):
-                        cv2.line(frame,(int(toll*1.2*W),0),(int(toll*1.2*W),H),(0,255,0),5)
-                    else:
-                        cv2.line(frame,(0,int(toll*1.2*H)),(H,int(toll*1.2*H)),(0,255,0),5)
+                while(not start):
+                    cv2.imshow("frame", frame)
+                    print("Press any key to start")
+                    if cv2.waitKey(0):
+                        start = True
+                        #to review
+                        # if ((cv2.waitKey(1) & 0xFF) == ord("n")):
+                        #     print("n")
+                        #     counter = RepsCounter("neck")
+                        # else:
+                        #     counter = RepsCounter(args["exercise"])
+                        #     print("default")
+                        cv2.destroyAllWindows()
+                        break
+                angles=PoseTracking.getAngles(W,H,land)
+                counter.count(angles,land)
+                toll, axis = counter.getToll()
+                if(axis == 0):
+                    cv2.line(frame,(int(toll*1.2*W),0),(int(toll*1.2*W),H),(0,255,0),5)
                 else:
-                    print("WAIT")
+                    cv2.line(frame,(0,int(toll*1.2*H)),(H,int(toll*1.2*H)),(0,255,0),5)
                 cv2.putText(frame, "reps:{}".format(counter.get()), (10, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
         # check to see if we are currently tracking an object

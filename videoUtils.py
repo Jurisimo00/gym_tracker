@@ -149,8 +149,11 @@ def getBodyIndex(event,x,y,flags,param):
     (H,W) = startframe.shape[:2]
 # to check if left mouse button was clicked
     if event == cv2.EVENT_LBUTTONDOWN:
-        is_selected_pos = True
         distance_np = [int(np.sqrt([((l.x*W-x)**2) + ((l.y*H-y)**2)])) for l in land]
+        if(np.min(distance_np)<50 and land[distance_np.index(np.min(distance_np))].visibility >0.5):
+            is_selected_pos = True
+        else:
+            print("point not valid")
         body_index = distance_np.index(np.min(distance_np))
         print("left click",x,y,body_index)
     if event == cv2.EVENT_RBUTTONDOWN:

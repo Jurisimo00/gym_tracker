@@ -2,13 +2,15 @@ from enum import Enum
 import numpy as np
 
 #study to use or not
+#use mediapipe enum!!!!!!!
 class BodyPositions(Enum):
     RIGHTSHOULDER = 12
     LEFTSHOULDER = 11
 
 class RepsCounter:
-    def __init__(self, exercise):
+    def __init__(self, exercise,body_index = 12):
         self.exercise = exercise
+        self.body_index=body_index
         self.reps = 0
         self.toll = 180
         self.prevLand = 0
