@@ -1,3 +1,5 @@
 numpy
 mediapipe
 opencv-python
+tk
+tcl

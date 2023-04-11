@@ -5,6 +5,8 @@ import time
 import cv2
 from RepsCounter import RepsCounter
 from videoThread import FileVideoStream as vt
+import gui
+
 
 is_selected_pos=False
 toll=0
@@ -16,11 +18,19 @@ def video(tracker,args):
     # start to fill
     print("[INFO] starting video file thread...")
     #fvs = FileVideoStream(args["video"]).start()
+    startWindow=gui.createStartWindow()
+    while True:
+        event, _ = startWindow.read(timeout=20)
+        if event != gui.sg.WIN_CLOSED and event != "__TIMEOUT__":
+            print(event)
+            counter = RepsCounter(event.lower())
+            break
     fvs = vt(args["video"]).start()
     time.sleep(1.0)
+    window=gui.createWIndow()
+
     # start the FPS timer
     fps = FPS().start()
-    counter = RepsCounter(args["exercise"])
     startFrame, _, land, _ = fvs.read()
     cv2.namedWindow('Frame')
     cv2.setMouseCallback('Frame',getBodyIndex, param=(land,startFrame))
@@ -28,6 +38,8 @@ def video(tracker,args):
     while(not is_selected_pos):
         cv2.imshow('Frame',startFrame)
         print("wait")
+        event, _ = window.read(timeout=20)
+        window["-OUTPUT-"].update("Select body part")
         if cv2.waitKey(20) & 0xFF == 27:
             break
     # select the bounding box of the object we want to track (make
@@ -37,38 +49,37 @@ def video(tracker,args):
     # start OpenCV object tracker using the supplied bounding box
     # coordinates
     tracker.init(startFrame, initBB)
+    cv2.destroyAllWindows()
     # loop over frames from the video file stream
     while fvs.more():
         # grab the frame from the threaded video file stream, resize
         # it, and convert it to grayscale (while still retaining 3
         # channels)
+        event, values = window.read(timeout=20)
+        if event == "Exit" or event == gui.sg.WIN_CLOSED:
+            break
         frame, skeleton, land, angles = fvs.read()
         #frame = imutils.resize(frame, width=450)
         (H, W) = frame.shape[:2]
         if(land):
             #left
-            cv2.putText(skeleton, f'{angles[3]}',(int(land[25].x*W),int(land[25].y*H)),
-                    cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
+            window["-LEFT_KNEE-"].update(str(angles[3]))
             cv2.circle(skeleton, (int(land[25].x*W),int(land[25].y*H)), 2,
                 (0, 255, 0), 2)
-            cv2.putText(skeleton, f'{angles[0]}',(int(land[13].x*W),int(land[13].y*H)),
-                    cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
+            window["-LEFT_ELBOW-"].update(str(angles[0]))
             cv2.circle(skeleton, (int(land[13].x*W),int(land[13].y*H)), 2,
                 (0, 255, 0), 2)
             #right
-            cv2.putText(skeleton, f'{angles[2]}',(int(land[26].x*W),int(land[26].y*H)),
-                    cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
+            window["-RIGHT_KNEE-"].update(str(angles[2]))
             cv2.circle(skeleton, (int(land[26].x*W),int(land[26].y*H)), 2,
                 (0, 255, 0), 2)
-            cv2.putText(skeleton, f'{angles[1]}',(int(land[14].x*W),int(land[14].y*H)),
-                    cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
+            window["-RIGHT_ELBOW-"].update(str(angles[1])) 
             cv2.circle(skeleton, (int(land[14].x*W),int(land[14].y*H)), 2,
                 (0, 255, 0), 2)
             #count reps
             #print(angles[3])
             counter.count(angles,land)
-            cv2.putText(frame, "reps:{}".format(counter.get()), (10, 50),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+            window["-REPS-"].update(counter.get())
             # toll, axis = counter.getToll()
             # if(axis == 0):
             #     cv2.line(frame,(int(toll*1.2*W),0),(int(toll*1.2*W),H),(0,255,0),5)
@@ -116,8 +127,12 @@ def video(tracker,args):
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
         # show the output frame
         #frame = cv2.flip(frame,1)
-        cv2.imshow("Frame", frame)
-        cv2.imshow('skeleton',skeleton)
+        #cv2.imshow("Frame", frame)
+        #cv2.imshow('skeleton',skeleton)
+        imgbytes = cv2.imencode(".png", frame)[1].tobytes()
+        window["-IMAGE-"].update(data=imgbytes)
+        imgbytes = cv2.imencode(".png", skeleton)[1].tobytes()
+        window["-SKELETON-"].update(data=imgbytes)
         key = cv2.waitKey(1) & 0xFF
         # if the 's' key is selected, we are going to "select" a bounding
         # box to track
@@ -140,6 +155,7 @@ def video(tracker,args):
     print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     # do a bit of cleanup
+    window.close()
     cv2.destroyAllWindows()
     fvs.stop()
 

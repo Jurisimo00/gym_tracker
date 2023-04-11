@@ -1,6 +1,6 @@
 se possibile aggiungere line di toll come in stream nel video
 aggiungere esercizio trazioni
-e gui più carina
+e gui più carina -> provare in opencv a creare un "pannello di controllo"
 aggiornare stream come video
 conteggio ripetizioni (occhio angoli None)->aggiungere libreria RepsCounter in cui andremo ad inserire i vari metodi per il conteggio (ci siamo versione video, da testare su versione stream) -> fare check di quale lato della persona è più visibile
 creare un drawUtils
