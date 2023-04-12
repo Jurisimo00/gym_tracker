@@ -10,6 +10,7 @@ import gui
 
 is_selected_pos=False
 toll=0
+body_index=0
 def video(tracker,args):
     initBB = None
     first = True
@@ -31,24 +32,20 @@ def video(tracker,args):
 
     # start the FPS timer
     fps = FPS().start()
-    startFrame, _, land, _ = fvs.read()
+    startFrame, skeleton, land, _ = fvs.read()
     cv2.namedWindow('Frame')
     cv2.setMouseCallback('Frame',getBodyIndex, param=(land,startFrame))
     #select which body part you want to use for the RepsCounter
     while(not is_selected_pos):
+        startFrame = cv2.addWeighted(startFrame,1.0,skeleton,0.3,0)
         cv2.imshow('Frame',startFrame)
         print("wait")
         event, _ = window.read(timeout=20)
         window["-OUTPUT-"].update("Select body part")
         if cv2.waitKey(20) & 0xFF == 27:
             break
-    # select the bounding box of the object we want to track (make
-    # sure you press ENTER or SPACE after selecting the ROI)
-    initBB = cv2.selectROI("Frame", startFrame, fromCenter=False,
-        showCrosshair=True)
-    # start OpenCV object tracker using the supplied bounding box
-    # coordinates
-    tracker.init(startFrame, initBB)
+    (H, W) = startFrame.shape[:2]
+    bodyPoints=np.array([[int(land[body_index].x*W),int(land[body_index].y*H)]],dtype=np.uint8)
     cv2.destroyAllWindows()
     # loop over frames from the video file stream
     while fvs.more():
@@ -88,47 +85,28 @@ def video(tracker,args):
         # show the frame and update the FPS counter
         cv2.waitKey(1)
         fps.update()
-        # check to see if we are currently tracking an object
-        if initBB is not None:
-            # grab the new bounding box coordinates of the object
-            (success, box) = tracker.update(frame)
-            # check to see if the tracking was a success
-            if success:
-                (x, y, w, h) = [int(v) for v in box]
-                cv2.rectangle(frame, (x, y), (x + w, y + h),
-                    (0, 255, 0), 2)
-                centerX = np.rint((x + (w/2))).astype(int)
-                centerY = np.rint((y + (y/2))).astype(int)
-                #print(centerX,centerY)
-                if first:
-                    points = np.array([[centerX,centerY]],dtype=np.uint8)
-                    first=False
-                points = np.append(points,[[centerX,centerY]], axis=0)
-                cv2.polylines(frame, 
-                [points[1:len(points)]], 
-                isClosed = False,
-                color = (0,255,0),
-                thickness = 3, 
-                lineType = cv2.LINE_AA)
-            # update the FPS counter
-            fps.update()
-            fps.stop()
-            # initialize the set of information we'll be displaying on
-            # the frame
-            info = [
-                ("Tracker", args["tracker"]),
-                ("Success", "Yes" if success else "No"),
-                ("FPS", "{:.2f}".format(fps.fps())),
-            ]
-            # loop over the info tuples and draw them on our frame
-            for (i, (k, v)) in enumerate(info):
-                text = "{}: {}".format(k, v)
-                cv2.putText(frame, text, (10, H - ((i * 20) + 20)),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+        #update the FPS counter
+        fps.update()
+        fps.stop()
+        #     # initialize the set of information we'll be displaying on
+        #     # the frame
+        info = [
+            ("FPS", "{:.2f}".format(fps.fps())),
+        ]
+        # loop over the info tuples and draw them on our frame
+        for (i, (k, v)) in enumerate(info):
+            text = "{}: {}".format(k, v)
+            cv2.putText(frame, text, (10, H - ((i * 20) + 20)),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+        if(land[body_index].visibility>0.5):
+            bodyPoints=np.append(bodyPoints,[[int(land[body_index].x*W),int(land[body_index].y*H)]], axis=0)
+            cv2.polylines(frame, 
+                    [bodyPoints[1:len(bodyPoints)]], 
+                    isClosed = False,
+                    color = (255,255,0),
+                    thickness = 3, 
+                    lineType = cv2.LINE_AA)
         # show the output frame
-        #frame = cv2.flip(frame,1)
-        #cv2.imshow("Frame", frame)
-        #cv2.imshow('skeleton',skeleton)
         imgbytes = cv2.imencode(".png", frame)[1].tobytes()
         window["-IMAGE-"].update(data=imgbytes)
         imgbytes = cv2.imencode(".png", skeleton)[1].tobytes()
@@ -138,18 +116,8 @@ def video(tracker,args):
         # box to track
         if key == ord("s"):
             print("s")
-            # select the bounding box of the object we want to track (make
-            # sure you press ENTER or SPACE after selecting the ROI)
-            initBB = cv2.selectROI("Frame", frame, fromCenter=False,
-                showCrosshair=True)
             #when track movement don't use poseTracking
             pose = False
-            # start OpenCV object tracker using the supplied bounding box
-            # coordinates
-            tracker.init(frame, initBB)
-        # if the `q` key was pressed, break from the loop
-        elif key == ord("q"):
-            break
         # stop the timer and display FPS information
     fps.stop()
     print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
@@ -160,7 +128,7 @@ def video(tracker,args):
     fvs.stop()
 
 def getBodyIndex(event,x,y,flags,param):
-    global is_selected_pos,toll
+    global is_selected_pos,toll,body_index
     (land,startframe) = param
     (H,W) = startframe.shape[:2]
 # to check if left mouse button was clicked

@@ -1,3 +1,4 @@
+creare un unico utils per stream e video
 se possibile aggiungere line di toll come in stream nel video
 aggiungere esercizio trazioni
 e gui più carina -> provare in opencv a creare un "pannello di controllo"
