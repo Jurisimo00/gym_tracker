@@ -36,10 +36,10 @@ def start(stream,args):
             startWindow.close()
             break
     if(stream):
-        fvs = WebcamStream(stream_id=0)
+        fvs = WebcamStream(pose,stream_id=0)
         fvs.start()
     else:
-        fvs = vt(args["video"]).start()
+        fvs = vt(args["video"], pose).start()
     time.sleep(1.0)
     window=gui.createWIndow()
 

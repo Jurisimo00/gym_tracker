@@ -10,7 +10,7 @@ def createStartWindow():
         [sg.Button("Squat", size=(10, 1)),
          sg.Button("Deadlift", size=(10, 1)),
          sg.Button("Neck", size=(10, 1))],
-        [sg.Radio("Body segmentation",key = "Pose", default=True)]
+        [sg.Radio("Body segmentation","options", key = "Pose", default=True)]
     ]
 
     # Create the window and show it without the plot
