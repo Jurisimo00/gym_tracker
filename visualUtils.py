@@ -19,8 +19,7 @@ is_selected_pos=False
 toll=0
 body_index=0
 def start(stream,args):
-    initBB = None
-    first = True
+    pose = True
     # construct the argument parse and parse the arguments
     # start the file video stream thread and allow the buffer to
     # start to fill
@@ -28,10 +27,13 @@ def start(stream,args):
     #fvs = FileVideoStream(args["video"]).start()
     startWindow=gui.createStartWindow()
     while True:
-        event, _ = startWindow.read(timeout=20)
+        event, values = startWindow.read(timeout=20)
         if event != gui.sg.WIN_CLOSED and event != "__TIMEOUT__":
             print(event)
+            if(values["Pose"] == False):
+                pose = False
             counter = RepsCounter(event.lower())
+            startWindow.close()
             break
     if(stream):
         fvs = WebcamStream(stream_id=0)
@@ -67,13 +69,9 @@ def start(stream,args):
         else:
             if(not fvs.more()):
                 break
-        # grab the frame from the threaded video file stream, resize
-        # it, and convert it to grayscale (while still retaining 3
-        # channels)
         event, values = window.read(timeout=20)
         if event == "Exit" or event == gui.sg.WIN_CLOSED:
             break
-        frame, skeleton, land, angles = fvs.read()
         #frame = imutils.resize(frame, width=450)
         (H, W) = frame.shape[:2]
         if(land):

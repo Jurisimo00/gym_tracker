@@ -42,19 +42,11 @@ def track():
 # if a video path was not supplied, grab the reference to the web cam
 	if not args.get("video", False):
 		print("[INFO] starting video stream...")
-		#vs = VideoStream(src=0).start()
-		#webcam_stream=WebcamStream(stream_id=0)
-		#webcam_stream.start()
-		#flag to know if is a stream or not
-		webcam = True
 		time.sleep(1.0)
 		#su.stream(tracker,args)
 		vs.start(True,args)
 # otherwise, grab a reference to the video file
 	else:
-		#vs = cv2.VideoCapture(args["video"])
-		#vs = FileVideoStream(args["video"]).start()
 		time.sleep(1.0)
-		webcam = False
 		#vu.video(tracker,args)
 		vs.start(False,args)

@@ -15,12 +15,13 @@ else:
 
 
 class FileVideoStream:
-    def __init__(self, path, transform=None, queue_size=256):
+    def __init__(self, path, pose, transform=None, queue_size=256):
         # initialize the file video stream along with the boolean
         # used to indicate if the thread should be stopped or not
         self.stream = cv2.VideoCapture(path)
         self.stopped = False
         self.transform = transform
+        self.pose = pose
 
         # initialize the queue used to store frames read from
         # the video file
@@ -70,9 +71,10 @@ class FileVideoStream:
                 # idle grabbing frames.
                 if self.transform:
                     frame = self.transform(frame)
-                (H, W) = frame.shape[:2]
-                frame, skeleton,land = PoseTracking.process(frame)
-                angles=PoseTracking.getAngles(W,H,land)
+                if(self.pose):
+                    (H, W) = frame.shape[:2]
+                    frame, skeleton,land = PoseTracking.process(frame)
+                    angles=PoseTracking.getAngles(W,H,land)
                 # add the frame to the queue
                 self.Q.put((frame,skeleton,land,angles))
             else:

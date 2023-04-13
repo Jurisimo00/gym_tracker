@@ -5,8 +5,9 @@ from threading import Thread # library for implementing multi-threaded processin
 
 # defining a helper class for implementing multi-threaded processing 
 class WebcamStream:
-    def __init__(self, stream_id=0):
+    def __init__(self, pose, stream_id=0):
         self.stream_id = stream_id   # default is 0 for primary camera 
+        self.pose = pose
         
         # opening video capture stream 
         self.vcap      = cv2.VideoCapture(self.stream_id)
@@ -40,9 +41,10 @@ class WebcamStream:
             if self.stopped is True :
                 break
             self.grabbed , self.frame = self.vcap.read()
-            (H, W) = self.frame.shape[:2]
-            self.frame, self.skeleton,self.land = PoseTracking.process(self.frame)
-            self.angles=PoseTracking.getAngles(W,H,self.land)
+            if(self.pose):
+                (H, W) = self.frame.shape[:2]
+                self.frame, self.skeleton,self.land = PoseTracking.process(self.frame)
+                self.angles=PoseTracking.getAngles(W,H,self.land)
             if self.grabbed is False :
                 print('[Exiting] No more frames to read')
                 self.stopped = True
