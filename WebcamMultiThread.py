@@ -1,5 +1,6 @@
 # importing required libraries 
 import cv2 
+import PoseTracking
 from threading import Thread # library for implementing multi-threaded processing 
 
 # defining a helper class for implementing multi-threaded processing 
@@ -39,6 +40,9 @@ class WebcamStream:
             if self.stopped is True :
                 break
             self.grabbed , self.frame = self.vcap.read()
+            (H, W) = self.frame.shape[:2]
+            self.frame, self.skeleton,self.land = PoseTracking.process(self.frame)
+            self.angles=PoseTracking.getAngles(W,H,self.land)
             if self.grabbed is False :
                 print('[Exiting] No more frames to read')
                 self.stopped = True
@@ -47,7 +51,7 @@ class WebcamStream:
 
     # method for returning latest read frame 
     def read(self):
-        return self.frame
+        return (self.frame, self.skeleton, self.land, self.angles)
 
     # method called to stop reading frames 
     def stop(self):

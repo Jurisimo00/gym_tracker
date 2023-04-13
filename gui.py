@@ -8,7 +8,8 @@ def createStartWindow():
         [sg.Text("Start WIndow", size=(60, 1), justification="center")],
         [sg.Text("Select the exercise to analise", key="-OUTPUT-")],
         [sg.Button("Squat", size=(10, 1)),
-         sg.Button("Deadlift", size=(10, 1))]
+         sg.Button("Deadlift", size=(10, 1)),
+         sg.Button("Neck", size=(10, 1))]
     ]
 
     # Create the window and show it without the plot

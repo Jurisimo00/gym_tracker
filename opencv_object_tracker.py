@@ -4,6 +4,7 @@ import time
 import cv2
 import streamUtils as su
 import videoUtils as vu
+import visualUtils as vs
 
 def track():
 	# construct the argument parser and parse the arguments
@@ -47,11 +48,13 @@ def track():
 		#flag to know if is a stream or not
 		webcam = True
 		time.sleep(1.0)
-		su.stream(tracker,args)
+		#su.stream(tracker,args)
+		vs.start(True,args)
 # otherwise, grab a reference to the video file
 	else:
 		#vs = cv2.VideoCapture(args["video"])
 		#vs = FileVideoStream(args["video"]).start()
 		time.sleep(1.0)
 		webcam = False
-		vu.video(tracker,args)
+		#vu.video(tracker,args)
+		vs.start(False,args)
