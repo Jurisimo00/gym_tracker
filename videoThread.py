@@ -1,4 +1,5 @@
 # import the necessary packages
+import threading
 from threading import Thread
 import sys
 import cv2
@@ -38,6 +39,7 @@ class FileVideoStream:
     def update(self):
         # keep looping infinitely
         while True:
+            print(threading.active_count())
             # if the thread indicator variable is set, stop the
             # thread
             if self.stopped:

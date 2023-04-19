@@ -1,3 +1,4 @@
+sistemare il check di visibilità nel pose 
 lavorare alla soluzione per il pose
 creare un unico utils per stream e video (ci siamo)
 se possibile aggiungere line di toll come in stream nel video

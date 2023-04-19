@@ -1,137 +1,148 @@
 # import the necessary packages
 import os
 import time
-
-import cv2
-import imutils
 import numpy as np
 from imutils.video import FPS
-from mediapipe.python.solutions.pose import PoseLandmark
-
-import PoseTracking
 from RepsCounter import RepsCounter
 from WebcamMultiThread import WebcamStream
+import cv2
+from RepsCounter import RepsCounter
+from videoThread import FileVideoStream as vt
+import gui
 
-
-def stream(tracker,args):
-    initBB = None
-    first = True
+is_selected_pos=False
+toll=0
+body_index=0
+def start(args):
     pose = True
-    start=False
-    counter = RepsCounter(args["exercise"])
-    webcam_stream=WebcamStream(stream_id=0)
-    webcam_stream.start()
-    start_time=time.time()
+    # construct the argument parse and parse the arguments
+    # start the file video stream thread and allow the buffer to
+    # start to fill
+    print("[INFO] starting video file thread...")
+    #fvs = FileVideoStream(args["video"]).start()
+    startWindow=gui.createStartWindow()
     while True:
-        frame = webcam_stream.read()
-        #frame = frame[1]
-        # check to see if we have reached the end of the stream
+        event, values = startWindow.read(timeout=20)
+        if event != gui.sg.WIN_CLOSED and event != "__TIMEOUT__":
+            print(event)
+            if(values["Pose"] == False):
+                pose = False
+            counter = RepsCounter(event.lower())
+            startWindow.close()
+            break
+    fvs = WebcamStream(pose,stream_id=0)
+    fvs.start()
+    time.sleep(1.0)
+    window=gui.createWIndow()
+    messageWindow=gui.messageWindow()
+
+    # start the FPS timer
+    fps = FPS().start()
+    startFrame, skeleton, land, _ = fvs.read()
+    cv2.namedWindow('Frame')
+    cv2.setMouseCallback('Frame',getBodyIndex, param=(land,startFrame))
+    #select which body part you want to use for the RepsCounter
+    while(not is_selected_pos):
+        startFrame = cv2.addWeighted(startFrame,1.0,skeleton,0.3,0)
+        cv2.imshow('Frame',startFrame)
+        print("wait")
+        event, _ = messageWindow.read(timeout=20)
+        if cv2.waitKey(20) & 0xFF == 27:
+            break
+    (H, W) = startFrame.shape[:2]
+    bodyPoints=np.array([[int(land[body_index].x*W),int(land[body_index].y*H)]],dtype=np.uint8)
+    cv2.destroyAllWindows()
+    # loop over frames from the video file stream
+    while True:
+        frame, skeleton, land, angles = fvs.read()
         if frame is None:
             break
-        # resize the frame (so we can process it faster) and grab the
-        # frame dimensions
-        frame = imutils.resize(frame, width=500)
+        event, values = window.read(timeout=20)
+        if event == "Exit" or event == gui.sg.WIN_CLOSED:
+            break
+        #frame = imutils.resize(frame, width=450)
         (H, W) = frame.shape[:2]
-        if pose:
-            frame, skeleton, land = PoseTracking.process(frame)
-            if(land):
-                a = np.array([int(land[PoseLandmark.LEFT_HIP].x*W),int(land[PoseLandmark.LEFT_HIP].y*H)])
-                b = np.array([int(land[PoseLandmark.LEFT_KNEE].x*W),int(land[PoseLandmark.LEFT_KNEE].y*H)])
-                c = np.array([int(land[PoseLandmark.LEFT_ANKLE].x*W),int(land[PoseLandmark.LEFT_ANKLE].y*H)])
-                cv2.circle(frame, (a[0], a[1]), 12,
-                    (0, 255, 0), 2)
-                check, angle = PoseTracking.getAngle(a,b,c)
-                if(check):
-                    cv2.putText(frame, f'{int(angle)}',(b[0],b[1]),
-                            cv2.FONT_HERSHEY_SIMPLEX,0.6, (0, 0, 255), 2)
-                while(not start):
-                    cv2.imshow("frame", frame)
-                    print("Press any key to start")
-                    if cv2.waitKey(0):
-                        start = True
-                        #to review
-                        # if ((cv2.waitKey(1) & 0xFF) == ord("n")):
-                        #     print("n")
-                        #     counter = RepsCounter("neck")
-                        # else:
-                        #     counter = RepsCounter(args["exercise"])
-                        #     print("default")
-                        cv2.destroyAllWindows()
-                        break
-                angles=PoseTracking.getAngles(W,H,land)
-                counter.count(angles,land)
-                toll, axis = counter.getToll()
-                if(axis == 0):
-                    cv2.line(frame,(int(toll*1.2*W),0),(int(toll*1.2*W),H),(0,255,0),5)
-                else:
-                    cv2.line(frame,(0,int(toll*1.2*H)),(H,int(toll*1.2*H)),(0,255,0),5)
-                cv2.putText(frame, "reps:{}".format(counter.get()), (10, 50),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-        # check to see if we are currently tracking an object
-        if initBB is not None:
-            # grab the new bounding box coordinates of the object
-            (success, box) = tracker.update(frame)
-            # check to see if the tracking was a success
-            if success:
-                (x, y, w, h) = [int(v) for v in box]
-                cv2.rectangle(frame, (x, y), (x + w, y + h),
-                    (0, 255, 0), 2)
-                centerX = int((x + (w/2)))
-                centerY = int((y + (h/2)))
-                if first:
-                    print(centerX,centerY)
-                    points = np.array([[centerX,centerY]],dtype=np.uint8)
-                    first=False
-                points = np.append(points,[[centerX,centerY]], axis=0)
-                cv2.polylines(frame, 
-                [points[1:len(points)]], 
-                isClosed = False,
-                color = (0,255,0),
-                thickness = 3, 
-                lineType = cv2.LINE_AA)
-            # update the FPS counter
-            fps.update()
-            fps.stop()
-            # initialize the set of information we'll be displaying on
-            # the frame
-            info = [
-                ("Tracker", args["tracker"]),
-                ("Success", "Yes" if success else "No"),
-                ("FPS", "{:.2f}".format(fps.fps())),
-            ]
-            # loop over the info tuples and draw them on our frame
-            for (i, (k, v)) in enumerate(info):
-                text = "{}: {}".format(k, v)
-                cv2.putText(frame, text, (10, H - ((i * 20) + 20)),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+        if(land):
+            #left
+            window["-LEFT_KNEE-"].update(str(angles[3]))
+            cv2.circle(skeleton, (int(land[25].x*W),int(land[25].y*H)), 2,
+                (0, 255, 0), 2)
+            window["-LEFT_ELBOW-"].update(str(angles[0]))
+            cv2.circle(skeleton, (int(land[13].x*W),int(land[13].y*H)), 2,
+                (0, 255, 0), 2)
+            #right
+            window["-RIGHT_KNEE-"].update(str(angles[2]))
+            cv2.circle(skeleton, (int(land[26].x*W),int(land[26].y*H)), 2,
+                (0, 255, 0), 2)
+            window["-RIGHT_ELBOW-"].update(str(angles[1])) 
+            cv2.circle(skeleton, (int(land[14].x*W),int(land[14].y*H)), 2,
+                (0, 255, 0), 2)
+            #count reps
+            #print(angles[3])
+            counter.count(angles,land)
+            window["-REPS-"].update(counter.get())
+            # toll, axis = counter.getToll()
+            # if(axis == 0):
+            #     cv2.line(frame,(int(toll*1.2*W),0),(int(toll*1.2*W),H),(0,255,0),5)
+            # else:
+            #     cv2.line(frame,(0,int(toll*1.2*H)),(H,int(toll*1.2*H)),(0,255,0),5)
+        # show the frame and update the FPS counter
+        cv2.waitKey(1)
+        fps.update()
+        #update the FPS counter
+        fps.update()
+        fps.stop()
+        #     # initialize the set of information we'll be displaying on
+        #     # the frame
+        info = [
+            ("FPS", "{:.2f}".format(fps.fps())),
+        ]
+        # loop over the info tuples and draw them on our frame
+        for (i, (k, v)) in enumerate(info):
+            text = "{}: {}".format(k, v)
+            cv2.putText(frame, text, (10, H - ((i * 20) + 20)),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+        if(land[body_index].visibility>0.5):
+            bodyPoints=np.append(bodyPoints,[[int(land[body_index].x*W),int(land[body_index].y*H)]], axis=0)
+            cv2.polylines(frame, 
+                    [bodyPoints[1:len(bodyPoints)]], 
+                    isClosed = False,
+                    color = (255,255,0),
+                    thickness = 3, 
+                    lineType = cv2.LINE_AA)
         # show the output frame
-        #frame = cv2.flip(frame,1)
-        cv2.imshow("Frame", frame)
-        cv2.imshow("Skeleton", skeleton)
+        imgbytes = cv2.imencode(".png", frame)[1].tobytes()
+        window["-IMAGE-"].update(data=imgbytes)
+        imgbytes = cv2.imencode(".png", skeleton)[1].tobytes()
+        window["-SKELETON-"].update(data=imgbytes)
         key = cv2.waitKey(1) & 0xFF
         # if the 's' key is selected, we are going to "select" a bounding
         # box to track
         if key == ord("s"):
-            # select the bounding box of the object we want to track (make
-            # sure you press ENTER or SPACE after selecting the ROI)
-            initBB = cv2.selectROI("Frame", frame, fromCenter=False,
-                showCrosshair=True)
+            print("s")
             #when track movement don't use poseTracking
             pose = False
-            # start OpenCV object tracker using the supplied bounding box
-            # coordinates, then start the FPS throughput estimator as well
-            tracker.init(frame, initBB)
-            fps = FPS().start()
-            
-                # if the `q` key was pressed, break from the loop
-        elif key == ord("q"):
-            break
-        #Restart application
-        if key == ord("r"):
-            webcam_stream.stop()
-            cv2.destroyAllWindows()
-            os.system('python3 "main.py"')
-            break
-    # if we are using a webcam, release the pointer
-    webcam_stream.stop()
+        # stop the timer and display FPS information
+    fps.stop()
+    print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
+    print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+    # do a bit of cleanup
+    window.close()
     cv2.destroyAllWindows()
+    fvs.stop()
+
+def getBodyIndex(event,x,y,flags,param):
+    global is_selected_pos,toll,body_index
+    (land,startframe) = param
+    (H,W) = startframe.shape[:2]
+# to check if left mouse button was clicked
+    if event == cv2.EVENT_LBUTTONDOWN:
+        distance_np = [int(np.sqrt([((l.x*W-x)**2) + ((l.y*H-y)**2)])) for l in land]
+        if(np.min(distance_np)<50 and land[distance_np.index(np.min(distance_np))].visibility >0.5):
+            is_selected_pos = True
+        else:
+            print("point not valid")
+        body_index = distance_np.index(np.min(distance_np))
+        print("left click",x,y,body_index)
+    if event == cv2.EVENT_RBUTTONDOWN:
+        toll = (x,y)

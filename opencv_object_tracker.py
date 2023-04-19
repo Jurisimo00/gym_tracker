@@ -3,8 +3,7 @@ import argparse
 import time
 import cv2
 import streamUtils as su
-import videoUtils as vu
-import visualUtils as vs
+import videoPool as vp
 
 def track():
 	# construct the argument parser and parse the arguments
@@ -44,9 +43,10 @@ def track():
 		print("[INFO] starting video stream...")
 		time.sleep(1.0)
 		#su.stream(tracker,args)
-		vs.start(True,args)
+		su.start(args)
 # otherwise, grab a reference to the video file
 	else:
 		time.sleep(1.0)
 		#vu.video(tracker,args)
-		vs.start(False,args)
+		#vs.start(False,args)
+		vp.start(args["video"],True)
