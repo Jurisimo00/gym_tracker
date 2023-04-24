@@ -22,6 +22,7 @@ import numpy as np
 import cv2 as cv
 
 from multiprocessing.pool import ThreadPool
+from multiprocessing import active_children
 from collections import deque
 
 import PoseTracking
@@ -112,14 +113,14 @@ def start(args, pose):
             (H, W) = frame.shape[:2]
             if(land):
             #left
-                window["-LEFT_KNEE-"].update(str(angles[3]))
+                window["-LEFT_KNEE-"].update(str(angles[2]))
                 cv.circle(skeleton, (int(land[25].x*W),int(land[25].y*H)), 2,
                     (0, 255, 0), 2)
                 window["-LEFT_ELBOW-"].update(str(angles[0]))
                 cv.circle(skeleton, (int(land[13].x*W),int(land[13].y*H)), 2,
                     (0, 255, 0), 2)
                 #right
-                window["-RIGHT_KNEE-"].update(str(angles[2]))
+                window["-RIGHT_KNEE-"].update(str(angles[3]))
                 cv.circle(skeleton, (int(land[26].x*W),int(land[26].y*H)), 2,
                     (0, 255, 0), 2)
                 window["-RIGHT_ELBOW-"].update(str(angles[1])) 
@@ -151,8 +152,11 @@ def start(args, pose):
             break
 
     print('Done')
+    pool.close()
     cv.destroyAllWindows()
-    sys.exit()
+    window.close()
+    children = active_children()
+    print(f'Active children: {len(children)}')
 
 
 def getBodyIndex(event,x,y,flags,param):
