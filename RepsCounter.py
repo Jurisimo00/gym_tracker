@@ -1,11 +1,7 @@
-from enum import Enum
 import numpy as np
+import mediapipe as mp
 
-#study to use or not
-#use mediapipe enum!!!!!!!
-class BodyPositions(Enum):
-    RIGHTSHOULDER = 12
-    LEFTSHOULDER = 11
+mp_pose = mp.solutions.pose
 
 class RepsCounter:
     def __init__(self, exercise,body_index = 12):
@@ -35,14 +31,19 @@ class RepsCounter:
             print(self.toll*1.2)
             return self.toll,0
     
-    def count(self, angle, land):
+    def count(self, angles, land):
         if(self.exercise == "squat"):
-            self.__squat(angle)
-        elif (self.exercise == "deadlift"):
-            if(land[12].visibility > land[11].visibility):
-                self.__deadlift(land[12])
+            if(land[mp_pose.PoseLandmark.LEFT_KNEE].visibility>land[mp_pose.PoseLandmark.RIGHT_KNEE].visibility):
+                self.__squat(angles[2])
+                print("left")
             else:
-                self.__deadlift(land[11])
+                self.__squat(angles[3])
+                print("right")
+        elif (self.exercise == "deadlift"):
+            if(land[mp_pose.PoseLandmark.RIGHT_SHOULDER].visibility > land[mp_pose.PoseLandmark.LEFT_SHOULDER].visibility):
+                self.__deadlift(land[mp_pose.PoseLandmark.RIGHT_SHOULDER])
+            else:
+                self.__deadlift(land[mp_pose.PoseLandmark.LEFT_SHOULDER])
         elif (self.exercise == "neck"):
             if(land[0].visibility == False):
                 print("false")
@@ -51,19 +52,21 @@ class RepsCounter:
             else:
                 self.__neck(land[1])
 
-    def __squat(self, angles: np.array) -> bool:
-        assert type(angles) == np.ndarray and "angles must be of type NDArray"
-        assert len(angles) >= 4 
-        if(type(angles[3]) == type(None)):
+
+    def __squat(self, angle: np.array) -> bool:
+        # assert type(angles) == np.ndarray and "angles must be of type NDArray"
+        # assert len(angles) >= 4
+
+        if(type(angle) == type(None)):
             return False
-        if(int(float(angles[3]))<100 and self.toll>100):
+        if(int(float(angle))<100 and self.toll>100):
             #first angle under tollerance
-            self.toll=int(float(angles[3]))
+            self.toll=int(float(angle))
             self.reps +=1
             print(self.toll)
             #one more rep
             return True
-        if(int(float(angles[3]))>100):
+        if(int(float(angle))>100):
             self.toll=180
             #no rep
             return False

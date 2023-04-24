@@ -44,8 +44,10 @@ class WebcamStream:
             if(self.pose):
                 (H, W) = self.frame.shape[:2]
                 self.frame, self.skeleton,self.land = PoseTracking.process(self.frame)
-                self.angles=PoseTracking.getAngles(W,H,self.land)
-                print("update")
+                if(self.land):
+                    self.angles=PoseTracking.getAngles(W,H,self.land)
+                else:
+                    self.angles = 0
             if self.grabbed is False :
                 print('[Exiting] No more frames to read')
                 self.stopped = True

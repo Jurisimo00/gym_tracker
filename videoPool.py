@@ -99,7 +99,7 @@ def start(args, pose):
                 break
         while len(pending) > 0 and pending[0].ready():
             frame, skeleton, land, angles = pending.popleft().get()
-            
+            print(land[body_index].visibility)
             if(land[body_index].visibility>0.5):
                 bodyPoints=np.append(bodyPoints,[[int(land[body_index].x*W),int(land[body_index].y*H)]], axis=0)
                 cv.polylines(frame, 
@@ -125,15 +125,17 @@ def start(args, pose):
                 window["-RIGHT_ELBOW-"].update(str(angles[1])) 
                 cv.circle(skeleton, (int(land[14].x*W),int(land[14].y*H)), 2,
                     (0, 255, 0), 2)
-            #count reps
-            #print(angles[3])
+            # #count reps
             counter.count(angles,land)
+            print(counter.get())
             window["-REPS-"].update(counter.get())
             # show the output frame
-            imgbytes = cv.imencode(".png", frame)[1].tobytes()
-            window["-IMAGE-"].update(data=imgbytes)
-            imgbytes = cv.imencode(".png", skeleton)[1].tobytes()
-            window["-SKELETON-"].update(data=imgbytes)
+            #imgbytes = cv.imencode(".png", frame)[1].tobytes()
+            #window["-IMAGE-"].update(data=imgbytes)
+            #imgbytes = cv.imencode(".png", skeleton)[1].tobytes()
+            #window["-SKELETON-"].update(data=imgbytes)
+            cv.imshow("fr",frame)
+            cv.imshow("sk",skeleton)
         if len(pending) < threadn:
             _ret, frame = cap.read()
             if threaded_mode:

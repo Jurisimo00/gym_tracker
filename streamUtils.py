@@ -5,7 +5,7 @@ import numpy as np
 from imutils.video import FPS
 from RepsCounter import RepsCounter
 from WebcamMultiThread import WebcamStream
-import cv2
+import cv2 as cv
 from RepsCounter import RepsCounter
 from videoThread import FileVideoStream as vt
 import gui
@@ -38,20 +38,21 @@ def start(args):
 
     # start the FPS timer
     fps = FPS().start()
-    startFrame, skeleton, land, _ = fvs.read()
-    cv2.namedWindow('Frame')
-    cv2.setMouseCallback('Frame',getBodyIndex, param=(land,startFrame))
     #select which body part you want to use for the RepsCounter
     while(not is_selected_pos):
-        startFrame = cv2.addWeighted(startFrame,1.0,skeleton,0.3,0)
-        cv2.imshow('Frame',startFrame)
+        startFrame, skeleton, land, _ = fvs.read()
+        cv.namedWindow('Frame')
+        cv.setMouseCallback('Frame',getBodyIndex, param=(land,startFrame))
+        startFrame = cv.addWeighted(startFrame,1.0,skeleton,0.3,0)
+        cv.imshow('Frame',startFrame)
         print("wait")
         event, _ = messageWindow.read(timeout=20)
-        if cv2.waitKey(20) & 0xFF == 27:
+        if cv.waitKey(20) & 0xFF == 27:
             break
     (H, W) = startFrame.shape[:2]
     bodyPoints=np.array([[int(land[body_index].x*W),int(land[body_index].y*H)]],dtype=np.uint8)
-    cv2.destroyAllWindows()
+    cv.destroyAllWindows()
+    messageWindow.close()
     # loop over frames from the video file stream
     while True:
         frame, skeleton, land, angles = fvs.read()
@@ -64,30 +65,40 @@ def start(args):
         (H, W) = frame.shape[:2]
         if(land):
             #left
-            window["-LEFT_KNEE-"].update(str(angles[3]))
-            cv2.circle(skeleton, (int(land[25].x*W),int(land[25].y*H)), 2,
+            window["-LEFT_KNEE-"].update(str(angles[2]))
+            cv.circle(skeleton, (int(land[25].x*W),int(land[25].y*H)), 2,
                 (0, 255, 0), 2)
             window["-LEFT_ELBOW-"].update(str(angles[0]))
-            cv2.circle(skeleton, (int(land[13].x*W),int(land[13].y*H)), 2,
+            cv.circle(skeleton, (int(land[13].x*W),int(land[13].y*H)), 2,
                 (0, 255, 0), 2)
             #right
-            window["-RIGHT_KNEE-"].update(str(angles[2]))
-            cv2.circle(skeleton, (int(land[26].x*W),int(land[26].y*H)), 2,
+            window["-RIGHT_KNEE-"].update(str(angles[3]))
+            cv.circle(skeleton, (int(land[26].x*W),int(land[26].y*H)), 2,
                 (0, 255, 0), 2)
             window["-RIGHT_ELBOW-"].update(str(angles[1])) 
-            cv2.circle(skeleton, (int(land[14].x*W),int(land[14].y*H)), 2,
+            cv.circle(skeleton, (int(land[14].x*W),int(land[14].y*H)), 2,
                 (0, 255, 0), 2)
             #count reps
             #print(angles[3])
             counter.count(angles,land)
+            print("counting")
             window["-REPS-"].update(counter.get())
-            # toll, axis = counter.getToll()
-            # if(axis == 0):
-            #     cv2.line(frame,(int(toll*1.2*W),0),(int(toll*1.2*W),H),(0,255,0),5)
-            # else:
-            #     cv2.line(frame,(0,int(toll*1.2*H)),(H,int(toll*1.2*H)),(0,255,0),5)
+            print(land[body_index].visibility)
+            if(land[body_index].visibility>0.5):
+                bodyPoints=np.append(bodyPoints,[[int(land[body_index].x*W),int(land[body_index].y*H)]], axis=0)
+                cv.polylines(frame, 
+                        [bodyPoints[1:len(bodyPoints)]], 
+                        isClosed = False,
+                        color = (255,255,0),
+                        thickness = 3, 
+                        lineType = cv.LINE_AA)
+            toll,axis=counter.getToll()
+            if(axis == 0):
+                cv.line(frame,(int(toll*1.2*W),0),(int(toll*1.2*W),H),(0,255,0),5)
+            else:
+                cv.line(frame,(0,int(toll*1.2*H)),(H,int(toll*1.2*H)),(0,255,0),5)
         # show the frame and update the FPS counter
-        cv2.waitKey(1)
+        cv.waitKey(1)
         fps.update()
         #update the FPS counter
         fps.update()
@@ -100,22 +111,17 @@ def start(args):
         # loop over the info tuples and draw them on our frame
         for (i, (k, v)) in enumerate(info):
             text = "{}: {}".format(k, v)
-            cv2.putText(frame, text, (10, H - ((i * 20) + 20)),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-        if(land[body_index].visibility>0.5):
-            bodyPoints=np.append(bodyPoints,[[int(land[body_index].x*W),int(land[body_index].y*H)]], axis=0)
-            cv2.polylines(frame, 
-                    [bodyPoints[1:len(bodyPoints)]], 
-                    isClosed = False,
-                    color = (255,255,0),
-                    thickness = 3, 
-                    lineType = cv2.LINE_AA)
+            cv.putText(frame, text, (10, H - ((i * 20) + 20)),
+                cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
         # show the output frame
-        imgbytes = cv2.imencode(".png", frame)[1].tobytes()
-        window["-IMAGE-"].update(data=imgbytes)
-        imgbytes = cv2.imencode(".png", skeleton)[1].tobytes()
-        window["-SKELETON-"].update(data=imgbytes)
-        key = cv2.waitKey(1) & 0xFF
+        # imgbytes = cv.imencode(".png", frame)[1].tobytes()
+        # window["-IMAGE-"].update(data=imgbytes)
+        # imgbytes = cv.imencode(".png", skeleton)[1].tobytes()
+        # window["-SKELETON-"].update(data=imgbytes)
+        cv.imshow("fr", frame)
+        cv.imshow("sk", skeleton)
+        key = cv.waitKey(1) & 0xFF
+
         # if the 's' key is selected, we are going to "select" a bounding
         # box to track
         if key == ord("s"):
@@ -128,7 +134,7 @@ def start(args):
     print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
     # do a bit of cleanup
     window.close()
-    cv2.destroyAllWindows()
+    cv.destroyAllWindows()
     fvs.stop()
 
 def getBodyIndex(event,x,y,flags,param):
@@ -136,7 +142,7 @@ def getBodyIndex(event,x,y,flags,param):
     (land,startframe) = param
     (H,W) = startframe.shape[:2]
 # to check if left mouse button was clicked
-    if event == cv2.EVENT_LBUTTONDOWN:
+    if event == cv.EVENT_LBUTTONDOWN:
         distance_np = [int(np.sqrt([((l.x*W-x)**2) + ((l.y*H-y)**2)])) for l in land]
         if(np.min(distance_np)<50 and land[distance_np.index(np.min(distance_np))].visibility >0.5):
             is_selected_pos = True
@@ -144,5 +150,6 @@ def getBodyIndex(event,x,y,flags,param):
             print("point not valid")
         body_index = distance_np.index(np.min(distance_np))
         print("left click",x,y,body_index)
-    if event == cv2.EVENT_RBUTTONDOWN:
+    if event == cv.EVENT_RBUTTONDOWN:
         toll = (x,y)
+        print(toll)
