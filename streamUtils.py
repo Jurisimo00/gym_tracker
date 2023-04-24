@@ -9,6 +9,7 @@ import cv2 as cv
 from RepsCounter import RepsCounter
 from videoThread import FileVideoStream as vt
 import gui
+from screeninfo import get_monitors
 
 is_selected_pos=False
 toll=0
@@ -38,10 +39,11 @@ def start(args):
 
     # start the FPS timer
     fps = FPS().start()
+    cv.namedWindow('Frame')
+    cv.namedWindow("Skeleton")
     #select which body part you want to use for the RepsCounter
     while(not is_selected_pos):
         startFrame, skeleton, land, _ = fvs.read()
-        cv.namedWindow('Frame')
         cv.setMouseCallback('Frame',getBodyIndex, param=(land,startFrame))
         startFrame = cv.addWeighted(startFrame,1.0,skeleton,0.3,0)
         cv.imshow('Frame',startFrame)
@@ -118,8 +120,10 @@ def start(args):
         # window["-IMAGE-"].update(data=imgbytes)
         # imgbytes = cv.imencode(".png", skeleton)[1].tobytes()
         # window["-SKELETON-"].update(data=imgbytes)
-        cv.imshow("fr", frame)
-        cv.imshow("sk", skeleton)
+        cv.imshow("Frame", frame)
+        cv.moveWindow("Frame",0,0)
+        cv.imshow("Skeleton",skeleton)
+        cv.moveWindow("Skeleton",get_monitors()[0].width,get_monitors()[0].height)
         key = cv.waitKey(1) & 0xFF
 
         # if the 's' key is selected, we are going to "select" a bounding

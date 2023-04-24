@@ -29,7 +29,7 @@ import PoseTracking
 import gui
 from RepsCounter import RepsCounter
 from imutils.video import FPS
-
+from screeninfo import get_monitors
 
 
 class DummyTask:
@@ -79,6 +79,7 @@ def start(args, pose):
     fps = FPS().start()
     _ret, startFrame = cap.read()
     startFrame, skeleton, land = PoseTracking.process(startFrame)
+    cv.namedWindow("Skeleton")
     cv.namedWindow('Frame')
     cv.setMouseCallback('Frame',getBodyIndex, param=(land,startFrame))
     #select which body part you want to use for the RepsCounter
@@ -135,10 +136,14 @@ def start(args, pose):
             #window["-IMAGE-"].update(data=imgbytes)
             #imgbytes = cv.imencode(".png", skeleton)[1].tobytes()
             #window["-SKELETON-"].update(data=imgbytes)
-            cv.imshow("fr",frame)
-            cv.imshow("sk",skeleton)
+            cv.imshow("Frame",frame)
+            cv.moveWindow("Frame",0,0)
+            cv.imshow("Skeleton",skeleton)
+            cv.moveWindow("Skeleton",get_monitors()[0].width,get_monitors()[0].height)
         if len(pending) < threadn:
             _ret, frame = cap.read()
+            if frame is None:
+                break
             if threaded_mode:
                 frame = frame.copy()
                 task = pool.apply_async(process_frame, (frame,))
