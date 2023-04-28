@@ -53,6 +53,8 @@ def start(args):
     bodyPoints=np.array([[int(land[body_index].x*W),int(land[body_index].y*H)]],dtype=np.uint8)
     cv.destroyAllWindows()
     messageWindow.close()
+    print("get in position")
+    time.sleep(5.0)
     #countdown to get ready in position
     # messageWindow=gui.messageWindow()
     # start_time = time.time()
