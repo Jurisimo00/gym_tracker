@@ -5,16 +5,15 @@ def createStartWindow():
 
     # Define the window layout
     layout = [
-        [sg.Text("Start WIndow", size=(60, 1), justification="center")],
+        [sg.Text("Start Window", size=(60, 1), justification="center")],
         [sg.Text("Select the exercise to analise", key="-OUTPUT-")],
         [sg.Button("Squat", size=(10, 1)),
          sg.Button("Deadlift", size=(10, 1)),
-         sg.Button("Neck", size=(10, 1))],
-        [sg.Radio("Body segmentation","options", key = "Pose", default=True)]
+         sg.Button("Neck", size=(10, 1))]
     ]
 
     # Create the window and show it without the plot
-    window = sg.Window("OpenCV Integration", layout, location=(800, 400))
+    window = sg.Window("Stats", layout, location=(800, 400))
     return window
 
 def messageWindow():
@@ -25,7 +24,7 @@ def messageWindow():
         [sg.Text("Select body part to track", key="-OUTPUT-")]
     ]
     # Create the window and show it without the plot
-    window = sg.Window("OpenCV Integration", layout, location=(800, 400))
+    window = sg.Window("Start", layout, location=(800, 400))
     return window
 
 def createWIndow():
@@ -45,5 +44,22 @@ def createWIndow():
     ]
 
     # Create the window and show it without the plot
-    window = sg.Window("OpenCV Integration", layout, location=(800, 400))
+    window = sg.Window("", layout, location=(800, 400))
     return window
+
+def createSelectionInputWindow():
+    sg.theme("LightGrey")
+
+    # Define the window layout
+    layout = [
+        [sg.Text("Select video or webcam", size=(60, 1), justification="center")],
+        [sg.Text("Select which input video you want to use")],
+        [sg.Button("Webcam", size=(10, 1))],
+        [sg.Text("Upload video from file system"),
+          sg.Input(),
+        sg.FileBrowse(key="-IN-")],
+         [sg.Button("Submit", size=(10,1))]
+    ] 
+    # Create the window and show it without the plot
+    window = sg.Window("Selection", layout, location=(800, 400))
+    return window   

@@ -1,5 +1,7 @@
 numpy
 mediapipe
 opencv-python
-tk
+PySimpleGUI
+screeninfo
+imutils
 tcl

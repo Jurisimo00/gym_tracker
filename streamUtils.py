@@ -26,8 +26,6 @@ def start(args):
         event, values = startWindow.read(timeout=20)
         if event != gui.sg.WIN_CLOSED and event != "__TIMEOUT__":
             print(event)
-            if(values["Pose"] == False):
-                pose = False
             counter = RepsCounter(event.lower())
             startWindow.close()
             break
@@ -55,6 +53,17 @@ def start(args):
     bodyPoints=np.array([[int(land[body_index].x*W),int(land[body_index].y*H)]],dtype=np.uint8)
     cv.destroyAllWindows()
     messageWindow.close()
+    #countdown to get ready in position
+    # messageWindow=gui.messageWindow()
+    # start_time = time.time()
+    # current_time=0
+    # while current_time<5:
+    #     frame, skeleton, _, _ = fvs.read()
+    #     cv.imshow('frame',frame)
+    #     cv.imshow('skeleton', skeleton)
+    #     event, _ = messageWindow.read(timeout=20)
+    #     current_time = time.time() - start_time
+    #     messageWindow["-OUTPUT-"].update('Get in position! {:02d}'.format(int(current_time)))
     # loop over frames from the video file stream
     while True:
         frame, skeleton, land, angles = fvs.read()
@@ -83,22 +92,22 @@ def start(args):
             #count reps
             #print(angles[3])
             counter.count(angles,land)
-            print("counting")
+            print(counter.get())
             window["-REPS-"].update(counter.get())
             print(land[body_index].visibility)
             if(land[body_index].visibility>0.5):
                 bodyPoints=np.append(bodyPoints,[[int(land[body_index].x*W),int(land[body_index].y*H)]], axis=0)
-                cv.polylines(frame, 
+        cv.polylines(frame, 
                         [bodyPoints[1:len(bodyPoints)]], 
                         isClosed = False,
                         color = (255,255,0),
                         thickness = 3, 
                         lineType = cv.LINE_AA)
-            toll,axis=counter.getToll()
-            if(axis == 0):
-                cv.line(frame,(int(toll*1.2*W),0),(int(toll*1.2*W),H),(0,255,0),5)
-            else:
-                cv.line(frame,(0,int(toll*1.2*H)),(H,int(toll*1.2*H)),(0,255,0),5)
+        toll,axis=counter.getToll()
+        if(axis == 0):
+            cv.line(frame,(int(toll*1.2*W),0),(int(toll*1.2*W),H),(0,255,0),5)
+        else:
+            cv.line(frame,(0,int(toll*1.2*H)),(H,int(toll*1.2*H)),(0,255,0),5)
         # show the frame and update the FPS counter
         cv.waitKey(1)
         fps.update()
@@ -125,13 +134,6 @@ def start(args):
         cv.imshow("Skeleton",skeleton)
         cv.moveWindow("Skeleton",get_monitors()[0].width,get_monitors()[0].height)
         key = cv.waitKey(1) & 0xFF
-
-        # if the 's' key is selected, we are going to "select" a bounding
-        # box to track
-        if key == ord("s"):
-            print("s")
-            #when track movement don't use poseTracking
-            pose = False
         # stop the timer and display FPS information
     fps.stop()
     print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))

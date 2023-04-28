@@ -33,12 +33,17 @@ class RepsCounter:
     
     def count(self, angles, land):
         if(self.exercise == "squat"):
-            if(land[mp_pose.PoseLandmark.LEFT_KNEE].visibility>land[mp_pose.PoseLandmark.RIGHT_KNEE].visibility):
-                self.__squat(angles[2])
-                print("left")
-            else:
-                self.__squat(angles[3])
-                print("right")
+            print(angles[2:4])
+            self.__squat(angles[2:4])
+            # print(land[mp_pose.PoseLandmark.LEFT_KNEE].visibility-land[mp_pose.PoseLandmark.RIGHT_KNEE].visibility)
+            # if(land[mp_pose.PoseLandmark.LEFT_KNEE].visibility-land[mp_pose.PoseLandmark.RIGHT_KNEE].visibility<0.45):
+            #     self.__squat(angles[2:4])
+            # elif(land[mp_pose.PoseLandmark.LEFT_KNEE].visibility>land[mp_pose.PoseLandmark.RIGHT_KNEE].visibility):
+            #     self.__squat(angles[2])
+            #     print("left")
+            # else:
+            #     self.__squat(angles[3])
+            #     print("right")
         elif (self.exercise == "deadlift"):
             if(land[mp_pose.PoseLandmark.RIGHT_SHOULDER].visibility > land[mp_pose.PoseLandmark.LEFT_SHOULDER].visibility):
                 self.__deadlift(land[mp_pose.PoseLandmark.RIGHT_SHOULDER])
@@ -55,22 +60,39 @@ class RepsCounter:
 
     def __squat(self, angle: np.array) -> bool:
         # assert type(angles) == np.ndarray and "angles must be of type NDArray"
-        # assert len(angles) >= 4
-
-        if(type(angle) == type(None)):
+        #assert len(angles) >= 1
+        # if(type(angle) is np.float64):
+        #     if(type(angle) == type(None)):
+        #         return False
+        #     if(int(float(angle))<120 and self.toll>120):
+        #         #first angle under tollerance
+        #         self.toll=int(float(angle))
+        #         self.reps +=1
+        #         print(self.toll)
+        #         #one more rep
+        #         return True
+        #     if(int(float(angle))>120):
+        #         self.toll=180
+        #         #no rep
+        #         return False
+        # elif(len(angle)==2):
+        #easier angle[angle<100] not empty
+        #check if all angles are nan
+        if(np.count_nonzero(np.isnan(angle))==len(angle)):
             return False
-        if(int(float(angle))<100 and self.toll>100):
+        if(np.any(angle[angle<120]) and self.toll>120):
             #first angle under tollerance
-            self.toll=int(float(angle))
+            self.toll=int(float(np.nanmin(angle)))
             self.reps +=1
             print(self.toll)
             #one more rep
             return True
-        if(int(float(angle))>100):
+        if(np.nanmin(angle)>120):
             self.toll=180
             #no rep
             return False
-        
+
+            
     def __deadlift(self, land) -> bool:
         print((land.y,self.toll, land.visibility))
         #setting the threshold

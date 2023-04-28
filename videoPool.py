@@ -65,11 +65,9 @@ def start(args, pose):
 
     startWindow=gui.createStartWindow()
     while True:
-        event, values = startWindow.read(timeout=20)
+        event, _ = startWindow.read(timeout=20)
         if event != gui.sg.WIN_CLOSED and event != "__TIMEOUT__":
             print(event)
-            if(values["Pose"] == False):
-                pose = False
             counter = RepsCounter(event.lower())
             startWindow.close()
             break
@@ -101,19 +99,19 @@ def start(args, pose):
                 break
         while len(pending) > 0 and pending[0].ready():
             frame, skeleton, land, angles = pending.popleft().get()
-            print(land[body_index].visibility)
-            if(land[body_index].visibility>0.5):
-                bodyPoints=np.append(bodyPoints,[[int(land[body_index].x*W),int(land[body_index].y*H)]], axis=0)
-                cv.polylines(frame, 
-                        [bodyPoints[1:len(bodyPoints)]], 
-                        isClosed = False,
-                        color = (255,255,0),
-                        thickness = 3, 
-                        lineType = cv.LINE_AA)
-            
-            (H, W) = frame.shape[:2]
             if(land):
-            #left
+                if(land[body_index].visibility>0.5):
+                    bodyPoints=np.append(bodyPoints,[[int(land[body_index].x*W),int(land[body_index].y*H)]], axis=0)
+                    cv.polylines(frame, 
+                            [bodyPoints[1:len(bodyPoints)]], 
+                            isClosed = False,
+                            color = (255,255,0),
+                            thickness = 3, 
+                            lineType = cv.LINE_AA)
+                
+                (H, W) = frame.shape[:2]
+                #if(land):
+                #left
                 window["-LEFT_KNEE-"].update(str(angles[2]))
                 cv.circle(skeleton, (int(land[25].x*W),int(land[25].y*H)), 2,
                     (0, 255, 0), 2)
@@ -127,19 +125,19 @@ def start(args, pose):
                 window["-RIGHT_ELBOW-"].update(str(angles[1])) 
                 cv.circle(skeleton, (int(land[14].x*W),int(land[14].y*H)), 2,
                     (0, 255, 0), 2)
-            # #count reps
-            counter.count(angles,land)
-            print(counter.get())
-            window["-REPS-"].update(counter.get())
-            # show the output frame
-            #imgbytes = cv.imencode(".png", frame)[1].tobytes()
-            #window["-IMAGE-"].update(data=imgbytes)
-            #imgbytes = cv.imencode(".png", skeleton)[1].tobytes()
-            #window["-SKELETON-"].update(data=imgbytes)
-            cv.imshow("Frame",frame)
-            cv.moveWindow("Frame",0,0)
-            cv.imshow("Skeleton",skeleton)
-            cv.moveWindow("Skeleton",get_monitors()[0].width,get_monitors()[0].height)
+                # #count reps
+                counter.count(angles,land)
+                print(counter.get())
+                window["-REPS-"].update(counter.get())
+                # show the output frame
+                #imgbytes = cv.imencode(".png", frame)[1].tobytes()
+                #window["-IMAGE-"].update(data=imgbytes)
+                #imgbytes = cv.imencode(".png", skeleton)[1].tobytes()
+                #window["-SKELETON-"].update(data=imgbytes)
+                cv.imshow("Frame",frame)
+                cv.moveWindow("Frame",0,0)
+                cv.imshow("Skeleton",skeleton)
+                cv.moveWindow("Skeleton",get_monitors()[0].width,get_monitors()[0].height)
         if len(pending) < threadn:
             _ret, frame = cap.read()
             if frame is None:

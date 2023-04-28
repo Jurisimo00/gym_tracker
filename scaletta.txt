@@ -1,6 +1,5 @@
-sistemare il check di visibilità nel pose 
+sistemare il check di visibilità nel pose -> se visibilità dei due angoli è simile fare un check di tutti e due
 lavorare alla soluzione per il pose
-creare un unico utils per stream e video (ci siamo)
 se possibile aggiungere line di toll come in stream nel video
 aggiungere esercizio trazioni
 e gui più carina -> provare in opencv a creare un "pannello di controllo"

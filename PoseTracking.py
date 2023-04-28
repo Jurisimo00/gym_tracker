@@ -47,17 +47,20 @@ def getAngles(width, height, land):
     #list of functional pose points see :https://github.com/google/mediapipe/blob/master/docs/solutions/pose.md#output
     index = [[11,13,15],[12,14,16],[23,25,27],[24,26,28]]
     angles=np.array([])
-    for i in index:
-        a = np.array([int(land[i[0]].x*width),int(land[i[0]].y*height)]) if (land[i[0]].visibility > 0.5) else None
-        b = np.array([int(land[i[1]].x*width),int(land[i[1]].y*height)]) if (land[i[1]].visibility > 0.5) else None
-        c = np.array([int(land[i[2]].x*width),int(land[i[2]].y*height)]) if (land[i[2]].visibility > 0.5) else None
-        check,angle=getAngle(a,b,c)
-        #print(angle)
-        if(check):
-            angles=np.append(angles,int(angle))
-            #print(angles)
-        else:
-            angles=np.append(angles,None)
-    #return tuples of angles and point to write angle
+    if(land):
+        for i in index:
+            a = np.array([int(land[i[0]].x*width),int(land[i[0]].y*height)]) if (land[i[0]].visibility > 0.5) else None
+            b = np.array([int(land[i[1]].x*width),int(land[i[1]].y*height)]) if (land[i[1]].visibility > 0.5) else None
+            c = np.array([int(land[i[2]].x*width),int(land[i[2]].y*height)]) if (land[i[2]].visibility > 0.5) else None
+            check,angle=getAngle(a,b,c)
+            #print(angle)
+            if(check):
+                angles=np.append(angles,int(angle))
+                #print(angles)
+            else:
+                angles=np.append(angles,np.nan)
+    else:
+        angles=np.append(angles,np.nan)
+        #return tuples of angles and point to write angle
     return angles
     
