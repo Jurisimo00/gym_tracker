@@ -2,6 +2,9 @@ import numpy as np
 import mediapipe as mp
 
 mp_pose = mp.solutions.pose
+SQUAT_TOLL = 120
+DEADLIFT_TOLL = 1.2
+NECK_TOLL = 1.2
 
 class RepsCounter:
     def __init__(self, exercise,body_index = 12):
@@ -20,15 +23,15 @@ class RepsCounter:
         #0 = axis x
         #1 = axis y
         if(self.exercise == "deadlift"):
-            print(self.toll*1.2)
+            print(self.toll*DEADLIFT_TOLL)
             return self.toll,1
 
         if(self.exercise == "squat"):
-            print(self.toll*1.2)
-            return self.toll,1
+            print(SQUAT_TOLL)
+            return SQUAT_TOLL,1
 
         if(self.exercise == "neck"):
-            print(self.toll*1.2)
+            print(self.toll*NECK_TOLL)
             return self.toll,0
     
     def count(self, angles, land):
@@ -80,14 +83,14 @@ class RepsCounter:
         #check if all angles are nan
         if(np.count_nonzero(np.isnan(angle))==len(angle)):
             return False
-        if(np.any(angle[angle<120]) and self.toll>120):
-            #first angle under tollerance
+        if(np.any(angle[angle<SQUAT_TOLL]) and self.toll>SQUAT_TOLL):
+            #first angle not nan under tollerance
             self.toll=int(float(np.nanmin(angle)))
             self.reps +=1
             print(self.toll)
             #one more rep
             return True
-        if(np.nanmin(angle)>120):
+        if(np.nanmin(angle)>SQUAT_TOLL):
             self.toll=180
             #no rep
             return False
@@ -99,13 +102,13 @@ class RepsCounter:
         if(self.first):
             self.toll = land.y
             self.first = False
-        if((land.y*1.2) < self.toll and not self.counted):
+        if((land.y*DEADLIFT_TOLL) < self.toll and not self.counted):
             self.reps+=1
             self.counted = True
             #self.prevLand=land[12].y
             print(True)
             return True
-        if((land.y*1.2) > self.toll):
+        if((land.y*DEADLIFT_TOLL) > self.toll):
             self.counted = False
             print(False)
         return False
@@ -114,12 +117,12 @@ class RepsCounter:
         if(self.first):
             self.toll = land.x
             self.first = False
-        if(land.x>(self.toll*1.2) and not self.counted):
+        if(land.x>(self.toll*NECK_TOLL) and not self.counted):
             self.reps+=1
             self.counted=True
-            print((land.x,self.toll*1.2))
+            print((land.x,self.toll*NECK_TOLL))
             return True
-        if(land.x<=(self.toll*1.2)):
+        if(land.x<=(self.toll*NECK_TOLL)):
             print((land.x,self.toll*1.2,self.counted))
             self.counted=False
         return False   

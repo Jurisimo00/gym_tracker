@@ -42,16 +42,10 @@ class DummyTask:
 
 is_selected_pos= False
 def start(args, pose):
-    import sys
-
-    try:
-        fn = sys.argv[1]
-    except:
-        fn = 0
+    stopped = False
     cap = cv.VideoCapture(args)
 
     def process_frame(frame):
-        # some intensive computation...
         frame, skeleton,land =PoseTracking.process(frame)
         H, W = frame.shape[:2]
         angles = PoseTracking.getAngles(H,W,land)
@@ -74,8 +68,7 @@ def start(args, pose):
     window=gui.createWIndow()
     messageWindow=gui.messageWindow()
 
-    fps = FPS().start()
-    _ret, startFrame = cap.read()
+    _, startFrame = cap.read()
     startFrame, skeleton, land = PoseTracking.process(startFrame)
     cv.namedWindow("Skeleton")
     cv.namedWindow('Frame')
@@ -97,7 +90,7 @@ def start(args, pose):
         event, values = window.read(timeout=20)
         if event == "Exit" or event == gui.sg.WIN_CLOSED:
                 break
-        while len(pending) > 0 and pending[0].ready():
+        while len(pending) > 0 and pending[0].ready() and not stopped:
             frame, skeleton, land, angles = pending.popleft().get()
             if(land):
                 if(land[body_index].visibility>0.5):
@@ -139,7 +132,7 @@ def start(args, pose):
                 cv.imshow("Skeleton",skeleton)
                 cv.moveWindow("Skeleton",get_monitors()[0].width,get_monitors()[0].height)
         if len(pending) < threadn:
-            _ret, frame = cap.read()
+            _, frame = cap.read()
             if frame is None:
                 break
             if threaded_mode:
@@ -151,9 +144,12 @@ def start(args, pose):
         ch = cv.waitKey(1)
         if ch == ord(' '):
             threaded_mode = not threaded_mode
+        if ch == ord('p'):
+            stopped = not stopped
         if ch == 27:
             break
 
+    
     print('Done')
     pool.close()
     cv.destroyAllWindows()
@@ -176,5 +172,5 @@ def getBodyIndex(event,x,y,flags,param):
             print("point not valid")
         body_index = distance_np.index(np.min(distance_np))
         print("left click",x,y,body_index)
-    if event == cv.EVENT_RBUTTONDOWN:
+    elif event == cv.EVENT_RBUTTONDOWN:
         toll = (x,y)
