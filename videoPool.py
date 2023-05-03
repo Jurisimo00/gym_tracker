@@ -21,6 +21,7 @@ from __future__ import print_function
 import numpy as np
 import cv2 as cv
 
+from multiprocessing import Lock
 from multiprocessing.pool import ThreadPool
 from multiprocessing import active_children
 from collections import deque
@@ -41,15 +42,24 @@ class DummyTask:
         return self.data
 
 is_selected_pos= False
+processed=[]
+angles_list=[]
+reps=[]
 def start(args, pose):
     stopped = False
+    real_time=True
     cap = cv.VideoCapture(args)
-
+    #study lock!!!
+    lock = Lock()
     def process_frame(frame):
         frame, skeleton,land =PoseTracking.process(frame)
         H, W = frame.shape[:2]
         angles = PoseTracking.getAngles(H,W,land)
-        return frame, skeleton, land, angles
+        lock.acquire()
+        counter.count(angles,land)
+        print("reps",counter.get())
+        lock.release()
+        return frame, skeleton, land, angles, counter.get()
     
     threadn = cv.getNumberOfCPUs()
     pool = ThreadPool(processes = threadn)
@@ -91,7 +101,7 @@ def start(args, pose):
         if event == "Exit" or event == gui.sg.WIN_CLOSED:
                 break
         while len(pending) > 0 and pending[0].ready() and not stopped:
-            frame, skeleton, land, angles = pending.popleft().get()
+            frame, skeleton, land, angles, rep = pending.popleft().get()
             if(land):
                 if(land[body_index].visibility>0.5):
                     bodyPoints=np.append(bodyPoints,[[int(land[body_index].x*W),int(land[body_index].y*H)]], axis=0)
@@ -103,7 +113,10 @@ def start(args, pose):
                             lineType = cv.LINE_AA)
                 
                 (H, W) = frame.shape[:2]
-                #if(land):
+                #count reps
+                # counter.count(angles,land)
+                # print(counter.get())
+                #if(real_time):
                 #left
                 window["-LEFT_KNEE-"].update(str(angles[2]))
                 cv.circle(skeleton, (int(land[25].x*W),int(land[25].y*H)), 2,
@@ -118,10 +131,7 @@ def start(args, pose):
                 window["-RIGHT_ELBOW-"].update(str(angles[1])) 
                 cv.circle(skeleton, (int(land[14].x*W),int(land[14].y*H)), 2,
                     (0, 255, 0), 2)
-                # #count reps
-                counter.count(angles,land)
-                print(counter.get())
-                window["-REPS-"].update(counter.get())
+                window["-REPS-"].update(rep)
                 # show the output frame
                 #imgbytes = cv.imencode(".png", frame)[1].tobytes()
                 #window["-IMAGE-"].update(data=imgbytes)
@@ -131,6 +141,10 @@ def start(args, pose):
                 cv.moveWindow("Frame",0,0)
                 cv.imshow("Skeleton",skeleton)
                 cv.moveWindow("Skeleton",get_monitors()[0].width,get_monitors()[0].height)
+            #else:
+                # processed.append(frame)
+                # angles_list.append(angles)
+                # reps.append(counter.get())
         if len(pending) < threadn:
             _, frame = cap.read()
             if frame is None:
@@ -149,7 +163,6 @@ def start(args, pose):
         if ch == 27:
             break
 
-    
     print('Done')
     pool.close()
     cv.destroyAllWindows()
@@ -157,6 +170,11 @@ def start(args, pose):
     children = active_children()
     print(f'Active children: {len(children)}')
 
+    # for i,f in enumerate(processed):
+    #     cv.imshow("f",f)
+    #     print(angles_list[i])
+    #     print(reps[i])
+    #     cv.waitKey(50)
 
 def getBodyIndex(event,x,y,flags,param):
     global is_selected_pos,toll,body_index
