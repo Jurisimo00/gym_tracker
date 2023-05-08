@@ -133,16 +133,11 @@ def start(args, pose):
                 cv.circle(skeleton, (int(land[14].x*W),int(land[14].y*H)), 2,
                     (0, 255, 0), 2)
                 window["-REPS-"].update(rep)
-                # show the output frame
-                #imgbytes = cv.imencode(".png", frame)[1].tobytes()
-                #window["-IMAGE-"].update(data=imgbytes)
-                #imgbytes = cv.imencode(".png", skeleton)[1].tobytes()
-                #window["-SKELETON-"].update(data=imgbytes)
                 cv.imshow("Frame",frame)
                 cv.moveWindow("Frame",0,0)
                 cv.imshow("Skeleton",skeleton)
                 cv.moveWindow("Skeleton",get_monitors()[0].width,get_monitors()[0].height)
-            #else:
+                #else:
                 # processed.append(frame)
                 # angles_list.append(angles)
                 # reps.append(counter.get())
