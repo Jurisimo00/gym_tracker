@@ -17,7 +17,8 @@ Keyboard shortcuts:
 
 # Python 2/3 compatibility
 from __future__ import print_function
-
+import faulthandler 
+#faulthandler.enable()
 import numpy as np
 import cv2 as cv
 
@@ -174,7 +175,7 @@ def start(args, pose):
     #     cv.imshow("f",f)
     #     print(angles_list[i])
     #     print(reps[i])
-    #     cv.waitKey(50)
+    #     cv.waitKey(50) #important!!
 
 def getBodyIndex(event,x,y,flags,param):
     global is_selected_pos,toll,body_index

@@ -17,7 +17,7 @@ args = vars(ap.parse_args())
 window=gui.createSelectionInputWindow()
 while True:
     event, values = window.read()
-    if event == "Submit":
+    if(values["-IN-"]!="" and event == "Submit"):
         path=values["-IN-"]
         time.sleep(1.0)
         #vu.video(tracker,args)
@@ -35,7 +35,7 @@ while True:
         time.sleep(1.0)
         #su.stream(tracker,args)
         window.close()
-        su.start(args)
+        su.start(values["-RECORD-"])
         break
 
         

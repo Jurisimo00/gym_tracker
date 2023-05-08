@@ -1,16 +1,18 @@
 # importing required libraries 
-import cv2 
+import cv2 as cv
 import PoseTracking
 from threading import Thread # library for implementing multi-threaded processing 
 
 # defining a helper class for implementing multi-threaded processing 
 class WebcamStream:
-    def __init__(self, pose, stream_id=0):
+    def __init__(self, record, stream_id=0):
         self.stream_id = stream_id   # default is 0 for primary camera 
-        self.pose = pose
-        
+        self.record = record
+        if self.record:
+            self.fourcc = cv.VideoWriter_fourcc('X','V','I','D')
+            self.videoWriter = cv.VideoWriter('video.avi', self.fourcc, 5.0, (640,480))
         # opening video capture stream 
-        self.vcap      = cv2.VideoCapture(self.stream_id)
+        self.vcap      = cv.VideoCapture(self.stream_id)
         if self.vcap.isOpened() is False :
             print("[Exiting]: Error accessing webcam stream.")
             exit(0)
@@ -41,17 +43,19 @@ class WebcamStream:
             if self.stopped is True :
                 break
             self.grabbed , self.frame = self.vcap.read()
-            if(self.pose):
-                (H, W) = self.frame.shape[:2]
-                self.frame, self.skeleton,self.land = PoseTracking.process(self.frame)
-                if(self.land):
-                    self.angles=PoseTracking.getAngles(W,H,self.land)
-                else:
-                    self.angles = 0
+            (H, W) = self.frame.shape[:2]
+            self.frame, self.skeleton,self.land = PoseTracking.process(self.frame)
+            if(self.land):
+                self.angles=PoseTracking.getAngles(W,H,self.land)
+            else:
+                self.angles = 0
             if self.grabbed is False :
                 print('[Exiting] No more frames to read')
                 self.stopped = True
+                self.videoWriter.release()
                 break 
+            if self.record:
+                self.videoWriter.write(self.frame)
         self.vcap.release()
 
     # method for returning latest read frame 

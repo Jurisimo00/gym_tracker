@@ -14,22 +14,20 @@ from screeninfo import get_monitors
 is_selected_pos=False
 toll=0
 body_index=0
-def start(args):
-    pose = True
+def start(record):
     # construct the argument parse and parse the arguments
     # start the file video stream thread and allow the buffer to
     # start to fill
     print("[INFO] starting video file thread...")
-    #fvs = FileVideoStream(args["video"]).start()
     startWindow=gui.createStartWindow()
     while True:
-        event, values = startWindow.read(timeout=20)
+        event, _ = startWindow.read(timeout=20)
         if event != gui.sg.WIN_CLOSED and event != "__TIMEOUT__":
             print(event)
             counter = RepsCounter(event.lower())
             startWindow.close()
             break
-    fvs = WebcamStream(pose,stream_id=0)
+    fvs = WebcamStream(record,stream_id=0)
     fvs.start()
     time.sleep(1.0)
     window=gui.createWIndow()
@@ -37,6 +35,7 @@ def start(args):
 
     # start the FPS timer
     fps = FPS().start()
+    #setting windows
     cv.namedWindow('Frame')
     cv.namedWindow("Skeleton")
     #select which body part you want to use for the RepsCounter
@@ -54,18 +53,21 @@ def start(args):
     cv.destroyAllWindows()
     messageWindow.close()
     print("get in position")
-    time.sleep(5.0)
+    #time.sleep(5.0)
     #countdown to get ready in position
-    # messageWindow=gui.messageWindow()
-    # start_time = time.time()
-    # current_time=0
-    # while current_time<5:
-    #     frame, skeleton, _, _ = fvs.read()
-    #     cv.imshow('frame',frame)
-    #     cv.imshow('skeleton', skeleton)
-    #     event, _ = messageWindow.read(timeout=20)
-    #     current_time = time.time() - start_time
-    #     messageWindow["-OUTPUT-"].update('Get in position! {:02d}'.format(int(current_time)))
+    messageWindow=gui.messageWindow()
+    start_time = time.time()
+    current_time=0
+    while current_time<5:
+        frame, skeleton, _, _ = fvs.read()
+        cv.imshow('Frame',frame)
+        cv.imshow('Skeleton', skeleton)
+        cv.moveWindow("Frame",0,0)
+        cv.moveWindow("Skeleton",get_monitors()[0].width,get_monitors()[0].height)
+        cv.waitKey(50)
+        event, _ = messageWindow.read(timeout=20)
+        current_time = time.time() - start_time
+        messageWindow["-OUTPUT-"].update('Get in position! {:02d}'.format(int(current_time)))
     # loop over frames from the video file stream
     while True:
         frame, skeleton, land, angles = fvs.read()
@@ -92,7 +94,6 @@ def start(args):
             cv.circle(skeleton, (int(land[14].x*W),int(land[14].y*H)), 2,
                 (0, 255, 0), 2)
             #count reps
-            #print(angles[3])
             counter.count(angles,land)
             print(counter.get())
             window["-REPS-"].update(counter.get())
@@ -132,9 +133,7 @@ def start(args):
         # imgbytes = cv.imencode(".png", skeleton)[1].tobytes()
         # window["-SKELETON-"].update(data=imgbytes)
         cv.imshow("Frame", frame)
-        cv.moveWindow("Frame",0,0)
         cv.imshow("Skeleton",skeleton)
-        cv.moveWindow("Skeleton",get_monitors()[0].width,get_monitors()[0].height)
         key = cv.waitKey(1) & 0xFF
         # stop the timer and display FPS information
     fps.stop()

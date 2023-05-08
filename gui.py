@@ -54,7 +54,7 @@ def createSelectionInputWindow():
     layout = [
         [sg.Text("Select video or webcam", size=(60, 1), justification="center")],
         [sg.Text("Select which input video you want to use")],
-        [sg.Button("Webcam", size=(10, 1))],
+        [sg.Button("Webcam", size=(10, 1)), sg.Checkbox('Record video', default=False, key="-RECORD-")],
         [sg.Text("Upload video from file system"),
           sg.Input(),
         sg.FileBrowse(key="-IN-")],
