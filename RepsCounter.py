@@ -98,6 +98,7 @@ class RepsCounter:
             
     def __deadlift(self, land) -> bool:
         print((land.y,self.toll, land.visibility))
+        #DEADLIFT_TOLL is useful to set counted to false because toll is set to the lowest point of the movement
         #setting the threshold
         if(self.first):
             self.toll = land.y

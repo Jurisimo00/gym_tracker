@@ -25,7 +25,9 @@ import cv2 as cv
 from multiprocessing import Lock
 from multiprocessing.pool import ThreadPool
 from multiprocessing import active_children
+from multiprocessing import Manager
 from collections import deque
+from os import getpid
 
 import PoseTracking
 import gui
@@ -51,18 +53,19 @@ def start(args, pose):
     real_time=True
     cap = cv.VideoCapture(args)
     #study lock!!!
-    lock = Lock()
-    def process_frame(frame):
-        frame, skeleton,land =PoseTracking.process(frame)
-        H, W = frame.shape[:2]
-        angles = PoseTracking.getAngles(H,W,land)
-        lock.acquire()
+    manager = Manager()
+    lock = manager.Lock()
+    def process_frame(frame,lock):
+        with lock:
+            frame, skeleton,land = PoseTracking.process(frame)
+            H, W = frame.shape[:2]
+            angles = PoseTracking.getAngles(H,W,land)
         counter.count(angles,land)
-        print("reps",counter.get())
-        lock.release()
+        print("reps",counter.get(), getpid(), active_children())
         return frame, skeleton, land, angles, counter.get()
     
     threadn = cv.getNumberOfCPUs()
+    print(threadn)
     pool = ThreadPool(processes = threadn)
     pending = deque()
 
@@ -147,7 +150,7 @@ def start(args, pose):
                 break
             if threaded_mode:
                 frame = frame.copy()
-                task = pool.apply_async(process_frame, (frame,))
+                task = pool.apply_async(process_frame, args=(frame,lock))
             else:
                 task = DummyTask(process_frame(frame))
             pending.append(task)
@@ -159,8 +162,9 @@ def start(args, pose):
         if ch == 27:
             break
 
-    print('Done')
     pool.close()
+    pool.join()
+    print('Done')
     cv.destroyAllWindows()
     window.close()
     children = active_children()
