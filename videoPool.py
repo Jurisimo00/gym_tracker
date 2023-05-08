@@ -60,9 +60,9 @@ def start(args, pose):
             frame, skeleton,land = PoseTracking.process(frame)
             H, W = frame.shape[:2]
             angles = PoseTracking.getAngles(H,W,land)
-        counter.count(angles,land)
-        print("reps",counter.get(), getpid(), active_children())
-        return frame, skeleton, land, angles, counter.get()
+            counter.count(angles,land)
+            print("reps",counter.get(), getpid(), active_children())
+            return frame, skeleton, land, angles, counter.get()
     
     threadn = cv.getNumberOfCPUs()
     print(threadn)
