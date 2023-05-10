@@ -9,11 +9,13 @@ import cv2 as cv
 from RepsCounter import RepsCounter
 from videoThread import FileVideoStream as vt
 import gui
+import analizer
 from screeninfo import get_monitors
 
 is_selected_pos=False
 toll=0
 body_index=0
+angles_list=[]
 def start(record):
     # construct the argument parse and parse the arguments
     # start the file video stream thread and allow the buffer to
@@ -79,6 +81,7 @@ def start(record):
         #frame = imutils.resize(frame, width=450)
         (H, W) = frame.shape[:2]
         if(land):
+            angles_list.append(angles)
             #left
             window["-LEFT_KNEE-"].update(str(angles[2]))
             cv.circle(skeleton, (int(land[25].x*W),int(land[25].y*H)), 2,
@@ -127,14 +130,8 @@ def start(record):
             text = "{}: {}".format(k, v)
             cv.putText(frame, text, (10, H - ((i * 20) + 20)),
                 cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-        # show the output frame
-        # imgbytes = cv.imencode(".png", frame)[1].tobytes()
-        # window["-IMAGE-"].update(data=imgbytes)
-        # imgbytes = cv.imencode(".png", skeleton)[1].tobytes()
-        # window["-SKELETON-"].update(data=imgbytes)
         cv.imshow("Frame", frame)
         cv.imshow("Skeleton",skeleton)
-        key = cv.waitKey(1) & 0xFF
         # stop the timer and display FPS information
     fps.stop()
     print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
@@ -143,6 +140,7 @@ def start(record):
     window.close()
     cv.destroyAllWindows()
     fvs.stop()
+    analizer.showAnglePlot(angles_list)
 
 def getBodyIndex(event,x,y,flags,param):
     global is_selected_pos,toll,body_index

@@ -20,20 +20,16 @@ while True:
     if(values["-IN-"]!="" and event == "Submit"):
         path=values["-IN-"]
         time.sleep(1.0)
-        #vu.video(tracker,args)
-        #vs.start(False,args)
         window.close()
-        vp.start(path,True)
+        vp.start(path)
         break
     elif event == gui.sg.WIN_CLOSED or event=="Exit":
         cv.destroyAllWindows()
         window.close()
-        close=True
         break
     elif event == "Webcam":
         print("[INFO] starting video stream...")
         time.sleep(1.0)
-        #su.stream(tracker,args)
         window.close()
         su.start(values["-RECORD-"])
         break

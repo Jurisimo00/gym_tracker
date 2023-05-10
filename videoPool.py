@@ -31,6 +31,7 @@ from os import getpid
 
 import PoseTracking
 import gui
+import analizer
 from RepsCounter import RepsCounter
 from imutils.video import FPS
 from screeninfo import get_monitors
@@ -45,12 +46,9 @@ class DummyTask:
         return self.data
 
 is_selected_pos= False
-processed=[]
 angles_list=[]
-reps=[]
-def start(args, pose):
+def start(args):
     stopped = False
-    real_time=True
     cap = cv.VideoCapture(args)
     #study lock!!!
     manager = Manager()
@@ -117,10 +115,6 @@ def start(args, pose):
                             lineType = cv.LINE_AA)
                 
                 (H, W) = frame.shape[:2]
-                #count reps
-                # counter.count(angles,land)
-                # print(counter.get())
-                #if(real_time):
                 #left
                 window["-LEFT_KNEE-"].update(str(angles[2]))
                 cv.circle(skeleton, (int(land[25].x*W),int(land[25].y*H)), 2,
@@ -140,10 +134,7 @@ def start(args, pose):
                 cv.moveWindow("Frame",0,0)
                 cv.imshow("Skeleton",skeleton)
                 cv.moveWindow("Skeleton",get_monitors()[0].width,get_monitors()[0].height)
-                #else:
-                # processed.append(frame)
-                # angles_list.append(angles)
-                # reps.append(counter.get())
+                angles_list.append(angles)
         if len(pending) < threadn:
             _, frame = cap.read()
             if frame is None:
@@ -169,12 +160,7 @@ def start(args, pose):
     window.close()
     children = active_children()
     print(f'Active children: {len(children)}')
-
-    # for i,f in enumerate(processed):
-    #     cv.imshow("f",f)
-    #     print(angles_list[i])
-    #     print(reps[i])
-    #     cv.waitKey(50) #important!!
+    analizer.showAnglePlot(angles_list)
 
 def getBodyIndex(event,x,y,flags,param):
     global is_selected_pos,toll,body_index
