@@ -113,6 +113,15 @@ def start(args):
                             color = (255,255,0),
                             thickness = 3, 
                             lineType = cv.LINE_AA)
+                    toll,axis=counter.getToll()
+
+                    print("Toll",toll*H)
+                    cv.line(frame, 
+                            (0,int(toll*H)),
+                            (W,int(toll*H)),
+                            color = (0,255,0),
+                            thickness = 3, 
+                            lineType = cv.LINE_AA)
                 
                 (H, W) = frame.shape[:2]
                 #left

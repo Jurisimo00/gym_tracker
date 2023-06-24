@@ -23,7 +23,7 @@ class RepsCounter:
         #0 = axis x
         #1 = axis y
         if(self.exercise == "deadlift"):
-            print(self.toll*DEADLIFT_TOLL)
+            print("Get",self.toll)
             return self.toll,1
 
         if(self.exercise == "squat"):
@@ -103,12 +103,13 @@ class RepsCounter:
         if(self.first):
             self.toll = land.y
             self.first = False
+        #ascending phase
         if((land.y*DEADLIFT_TOLL) < self.toll and not self.counted):
             self.reps+=1
             self.counted = True
-            #self.prevLand=land[12].y
             print(True)
             return True
+        #descending phase
         if((land.y*DEADLIFT_TOLL) > self.toll):
             self.counted = False
             print(False)
