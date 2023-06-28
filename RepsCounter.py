@@ -33,6 +33,9 @@ class RepsCounter:
         if(self.exercise == "neck"):
             print(self.toll*NECK_TOLL)
             return self.toll,0
+        
+        if(self.exercise=="free"):
+            return 0,0
     
     def count(self, angles, land):
         if(self.exercise == "squat"):
@@ -59,6 +62,9 @@ class RepsCounter:
                 self.__neck(land[0])
             else:
                 self.__neck(land[1])
+        elif(self.exercise == "free"):
+            self.__free()
+
 
 
     def __squat(self, angle: np.array) -> bool:
@@ -128,3 +134,6 @@ class RepsCounter:
             print((land.x,self.toll*1.2,self.counted))
             self.counted=False
         return False   
+    
+    def __free(self):
+        return False

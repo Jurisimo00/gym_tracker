@@ -1,7 +1,7 @@
 import cv2 as cv
 import mediapipe as mp
 import numpy as np
-import enum
+import math
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
@@ -34,9 +34,12 @@ def process(image):
             return image,skeleton,False
     return image,skeleton, results.pose_landmarks.landmark
 
+def finding_gradient(dot1,dot2):
+    return (dot2[1]-dot1[1])/(dot2[0]-dot1[0])
+
 def getAngle(a,b,c):
     #check if a b c are valid points
-    if(type(a) != type(None) and type(b) != type(None) and type(c) != type(None)):
+    if(a is not None and b is not None and c is not None):
         ba = a - b
         bc = c - b
         cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
